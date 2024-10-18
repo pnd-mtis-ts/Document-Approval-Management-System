@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SuperAdmin Dashboard</title>
+</head>
+<body>
+    <h2>Selamat datang di dashboard SuperAdmin</h2>
+    <div id="welcome-message"></div>
+    
+    <!-- Tombol SuperAdmin -->
+    <button id="create-account-btn">Buat Akun</button>
+    <button id="edit-account-btn">Edit Akun</button>
+
+    <!-- Tombol untuk logout -->
+    <button id="logout-button">Logout</button>
+    <button id="toAdminBtn">Ke halaman Admin</button>
+    <button id="toUser">Ke halaman User</button>
+
+    <script>
+        // Ambil nama dan role dari localStorage atau API
+        const welcomeMessage = document.getElementById('welcome-message');
+        const name = localStorage.getItem('userName'); // Simpan nama saat login
+        const role = localStorage.getItem('userRole'); // Simpan role saat login
+
+        if (name && role) {
+            welcomeMessage.textContent = `Selamat datang, ${name}! Role anda: ${role}.`;
+        }
+
+        const createAccountBtn = document.getElementById('create-account-btn');
+        const editAccountBtn = document.getElementById('edit-account-btn');
+        const toAdminBtn = document.getElementById('toAdminBtn');
+        const toUserBtn = document.getElementById('toUser');
+
+        if (role === "SuperAdmin" || role === "Aplikasi") {
+            createAccountBtn.addEventListener('click', () => {
+                window.location.href = 'form-daftar.html'; // Arahkan ke halaman pendaftaran
+            });
+
+            editAccountBtn.addEventListener('click', () => {
+                alert('Halo SuperAdmin!!');
+            });
+        } else {
+            createAccountBtn.addEventListener('click', () => {
+                alert('Hanya SuperAdmin yang bisa mengakses fitur ini!');
+            });
+
+            editAccountBtn.addEventListener('click', () => {
+                alert('Hanya SuperAdmin yang bisa mengakses fitur ini!');
+            });
+        }
+
+        toAdminBtn.addEventListener('click', () => {
+            window.location.href = '/admin-dashboard.html';
+        });
+
+        toUserBtn.addEventListener('click', () => {
+            window.location.href = '/user-dashboard.html';
+        });
+
+        // Tambahkan event listener untuk tombol logout
+        document.getElementById('logout-button').addEventListener('click', () => {
+            localStorage.removeItem('accessToken'); // Hapus token
+            localStorage.removeItem('userName');
+            localStorage.removeItem('userRole');
+            window.location.href = '/'; // Kembali ke halaman login
+        });
+    </script>
+</body>
+</html>

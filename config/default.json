@@ -1,0 +1,44 @@
+{
+  "host": "localhost",
+  "port": 3030,
+  "public": "./public/",
+  "origins": [
+    "http://localhost:3030"
+  ],
+  "paginate": {
+    "default": 10,
+    "max": 50
+  },
+  "mysql": {
+    "client": "mysql",
+    "connection": "mysql://root:root@localhost:3306/user"
+  },
+  "authentication": {
+    "entity": "user",
+    "service": "users",
+    "secret": "xSXnw7G1hjXjNi8iqhoTE55dn2hwznAS",
+    "authStrategies": [
+      "jwt",
+      "local",
+      "google"
+    ],
+    "jwtOptions": {
+      "header": {
+        "typ": "access"
+      },
+      "audience": "http://localhost:3030",
+      "algorithm": "HS256",
+      "expiresIn": "1d"
+    },
+    "local": {
+      "usernameField": "email",
+      "passwordField": "password"
+    }, "oauth": {
+    "google": {
+      "key": "82764557930-brbk6g3puekvac4d8tsc47k27h6p2tmm.apps.googleusercontent.com",
+        "secret": "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",
+        "scope": ["openid", "email","profile"]
+    }
+  }
+  }
+}

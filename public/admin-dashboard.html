@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+</head>
+<body>
+    <h2>Selamat datang di dashboard Admin</h2>
+    <div id="welcome-message"></div>
+    
+    <!-- Tombol yang hanya bisa diakses oleh SuperAdmin dan Admin -->
+    <button id="admin-button">Tombol SuperAdmin & Admin</button>
+
+    <!-- Tombol untuk logout -->
+    <button id="logout-button">Logout</button>
+    <button id="tosprAdmin">Ke halaman SuperAdmin</button>
+    <button id="toUser">ke halaman User</button>
+
+    <script>
+        // Ambil nama dan role dari localStorage atau API
+        const welcomeMessage = document.getElementById('welcome-message');
+        const name = localStorage.getItem('userName'); // Simpan nama saat login
+        const role = localStorage.getItem('userRole'); // Simpan role saat login
+        const kesprAdmin = document.getElementById('tosprAdmin');
+        const keUser = document.getElementById('toUser');
+        const adminBtn = document.getElementById('admin-button');
+
+        if (name && role) {
+            welcomeMessage.textContent = `Selamat datang, ${name}! Role anda: ${role}.`;
+        }
+    
+        adminBtn.addEventListener('click', () => {
+            // Cek role pengguna
+            if (role === 'SuperAdmin' || role === 'Admin') {
+                alert(`Halo, ${role}!`); 
+            } else {
+                alert('Fitur ini hanya bisa diakses oleh SuperAdmin dan Admin.'); 
+            }
+        });
+        
+        kesprAdmin.addEventListener('click', () => {
+            window.location.href = '/superadmin-dashboard.html';
+        })
+        keUser.addEventListener('click', () => {
+            window.location.href = 'user-dashboard.html';
+        })
+        // Tambahkan event listener untuk tombol logout
+        document.getElementById('logout-button').addEventListener('click', () => {
+            localStorage.removeItem('accessToken'); // Hapus token
+            localStorage.removeItem('userName');
+            localStorage.removeItem('userRole');
+            window.location.href = '/'; // Kembali ke halaman login
+        });
+    </script>
+</body>
+</html>
