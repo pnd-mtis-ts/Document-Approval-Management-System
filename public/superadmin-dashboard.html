@@ -11,7 +11,7 @@
     
     <!-- Tombol SuperAdmin -->
     <button id="create-account-btn">Buat Akun</button>
-    <button id="edit-account-btn">Edit Akun</button>
+    <button id="list-akun">List Akun</button>
 
     <!-- Tombol untuk logout -->
     <button id="logout-button">Logout</button>
@@ -29,7 +29,7 @@
         }
 
         const createAccountBtn = document.getElementById('create-account-btn');
-        const editAccountBtn = document.getElementById('edit-account-btn');
+        const listAccountBtn = document.getElementById('list-akun');
         const toAdminBtn = document.getElementById('toAdminBtn');
         const toUserBtn = document.getElementById('toUser');
 
@@ -37,16 +37,16 @@
             createAccountBtn.addEventListener('click', () => {
                 window.location.href = 'form-daftar.html'; // Arahkan ke halaman pendaftaran
             });
-
-            editAccountBtn.addEventListener('click', () => {
-                alert('Halo SuperAdmin!!');
-            });
+            listAccountBtn.addEventListener('click', () => {
+                window.location.href = 'list-akun.html';
+            })
+            
         } else {
             createAccountBtn.addEventListener('click', () => {
                 alert('Hanya SuperAdmin yang bisa mengakses fitur ini!');
             });
 
-            editAccountBtn.addEventListener('click', () => {
+            listAccountBtn.addEventListener('click', () => {
                 alert('Hanya SuperAdmin yang bisa mengakses fitur ini!');
             });
         }

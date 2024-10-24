@@ -32,7 +32,6 @@ export class UsersService extends KnexService {
 
     userData.name = nameWithSuffix;
 
-    // Start a transaction
     const trx = await this.knex.transaction();
  
     try {
@@ -110,7 +109,6 @@ export class UsersService extends KnexService {
         .where({ 'usersauth.user_id': user.id })
         .first();
     }
-  
     return users;
   }
 

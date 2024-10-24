@@ -1,9 +1,7 @@
-// URL API Anda
 const apiUrl = 'http://localhost:3030/users'; 
 const authUrl = 'http://localhost:3030/authentication'; 
 const googleAuthUrl = 'http://localhost:3030/oauth/google';
 
-// Fungsi untuk menambahkan pengguna (Pendaftaran)
 const createUser = async (userData) => {
     try {
         const response = await fetch(apiUrl, {
@@ -22,7 +20,6 @@ const createUser = async (userData) => {
     }
 };
 
-// Fungsi untuk login
 const loginUser = async (loginData) => {
     try {
         const response = await fetch(authUrl, {
@@ -44,11 +41,6 @@ const getUserRole = (user) => {
     return user.userAuth.role;
 }
 
-const getAccessTokenFromCookie = (data) => {
-    return data.get('accessToken');
-};
-
-// Fungsi untuk mendapatkan pengguna berdasarkan email
 const getUserByEmail = async (email) => {
     try {
         const response = await fetch(`${apiUrl}?email=${email}`);
@@ -59,7 +51,6 @@ const getUserByEmail = async (email) => {
         return { error: error.message };
     }
 };
-// const accessToken = getAccessTokenFromCookie(data);
 
 const getCurrentUserInfo = async (accessToken) => {
     try {
@@ -91,7 +82,6 @@ const getCurrentUserInfo = async (accessToken) => {
     }
 };
 
-
 const adminButtons = document.getElementById('admin-buttons');
 const logoutButtons = document.getElementById('logout-button');
 
@@ -109,7 +99,7 @@ const logoutUser = () => {
     if (logoutButtons) {
         logoutButtons.style.display = 'none';
     }
-    window.location.href = '/'; // Redirect ke halaman login setelah logout
+    window.location.href = '/'; 
 };
 
 // Fungsi untuk mengarahkan pengguna ke dashboard yang sesuai
@@ -158,7 +148,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Event listener untuk login dengan Google
     const loginWithGoogle = () => {
         window.location.href = googleAuthUrl;
     };
@@ -189,7 +178,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 localStorage.setItem('userRole', userRole);
 
                 redirectToDashboard(userRole);
-                // alert(`Halooo ${user.role}`);
                 
                 loginForm.reset();
             } else {
@@ -203,13 +191,11 @@ document.addEventListener('DOMContentLoaded', function () {
         logoutButtons.addEventListener('click', logoutUser);
     }
 
-    // Memanggil fungsi handlePageLoad untuk menampilkan pesan selamat datang
     handlePageLoad();
 });
 
 // Fungsi untuk menangani muatan halaman
 const handlePageLoad = async () => {
-    //localStorage.clear();
     
     const welcomeMessage = document.getElementById('welcome-message');
     const path = window.location.pathname;
@@ -223,7 +209,7 @@ const handlePageLoad = async () => {
         token = hash.split('access_token=')[1].split('&')[0];
 
         // Gunakan token untuk mendapatkan informasi pengguna
-        const userInfo = await getCurrentUserInfo(token); //getUserInfo(accessToken);
+        const userInfo = await getCurrentUserInfo(token); 
         if (userInfo && !userInfo.error) {
             // Simpan nama dan role ke localStorage
             localStorage.setItem('userName', userInfo.name);

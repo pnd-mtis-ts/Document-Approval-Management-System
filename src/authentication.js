@@ -1,7 +1,7 @@
 import { authenticate, AuthenticationService, JWTStrategy } from '@feathersjs/authentication';
 import { LocalStrategy } from '@feathersjs/authentication-local';
 import { OAuthStrategy, oauth } from '@feathersjs/authentication-oauth';
-import { setCookie, parseCookie } from 'koa-cookies';
+import { clearCookie, setCookie, parseCookie } from 'koa-cookies';
 
 class GoogleStrategy extends OAuthStrategy {
   async getEntityData(profile) {
@@ -18,85 +18,88 @@ class GoogleStrategy extends OAuthStrategy {
       pin: '000000'
     };
   }
-//   async getRedirect(data,params){
-//     const token = data.accessToken;
-//     // console.log(data);
-
-//     const getCurrentUserInfo = async (token) => {
-//       try {
-//           if (!token) {
-//               throw new Error('Access token tidak ditemukan');
-//           }
   
-//           const response = await fetch(`http://localhost:3030/authentication`, {
-//               method: 'POST',
-//               headers: {
-//                   'Authorization': `Bearer ${token}`,
-//                   'Content-Type': 'application/json',
-//               },
-//               body: JSON.stringify({
-//                   strategy: 'jwt',
-//                   accessToken: token
-//               })
-//           });
-  
-//           if (!response.ok) {
-//               throw new Error('Gagal mendapatkan informasi pengguna');
-//           }
-  
-//           const authResult = await response.json();
-//           return authResult.user;
-//       } catch (error) {
-//           console.error('Gagal mendapatkan informasi pengguna:', error.message);
-//           return { error: error.message };
-//       }
-//   };
+  async getRedirect(data, params) {
+    try {
+      // Pastikan token ada
+      const token = data.accessToken;
+      if (!token) {
+          console.error('Token tidak tersedia');
+          return '/';
+      }
+      
+      // Fungsi untuk mendapatkan informasi user
+      const getCurrentUserInfo = async (token) => {
+          try {
+              const response = await fetch('http://localhost:3030/authentication', {
+                  method: 'POST',
+                  headers: {
+                      'Authorization': `Bearer ${token}`,
+                      'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                      strategy: 'jwt',
+                      accessToken: token
+                  })
+              });
 
-//   const user = await getCurrentUserInfo(token);
+              if (!response.ok) {
+                  throw new Error(`HTTP error! status: ${response.status}`);
+              }
+ 
+              const authResult = await response.json();
+              return authResult.user;
+          } catch (error) {
+              console.error('Error dalam getCurrentUserInfo:', error);
+              throw error; 
+          }
+      };
 
-//   if (user.error) {
-//     console.error('Error:', user.error);
-//     return '/';  // Kembali ke login jika terjadi kesalahan
-// }
+      const user = await getCurrentUserInfo(token);
+      
+      console.log('User data:', user);
+      console.log('User role:', user?.userAuth?.role);
+      console.log('Email:', user?.email);
+      console.log('Token:', token);
 
-// if (!user.userAuth || !user.userAuth.role) {
-//     console.error('UserAuth atau role tidak ditemukan');
-//     return '/login';  // Kembali ke login jika userAuth atau role tidak ditemukan
-// }
-//   const userRole = user.userAuth.role;
-//   const email = user.email;
-//   console.log(user);  
-//   console.log(userRole);
-//   console.log(email)
+      // localStorage.setItem('userRole', user.userAuth.role);
 
-//   switch(userRole) {
-//     case 'SuperAdmin':
-//         window.location.href = '/dashboard/superadmin';
-//         break;
-//     case 'Admin':
-//         window.location.href = '/dashboard/admin';
-//         break;
-//     case 'User':
-//         window.location.href = '/user-dashboard.html';
-//         break;
-//     default:
-//         window.location.href = '/';  // Fallback ke halaman login
-// }
+      // Validasi data user
+      if (!user || !user.userAuth || !user.userAuth.role) {
+          console.error('Data user tidak lengkap');
+          return '/';
+      }
+      // Redirect berdasarkan role
+      const userRole = user.userAuth.role;
+      switch(userRole) {
+          case 'SuperAdmin':
+              return '/superadmin-dashboard.html';
+          case 'Admin':
+              return '/admin-dashboard.html';
+          case 'User':
+              return '/user-dashboard.html';
+          default:
+              return '/';
+      } 
+  } catch (error) {
+      console.error('Error dalam getRedirect:', error);
+      return '/';
+  }
 
-//   }
+}
+
 }
 
 class CustomJWTStrategy extends JWTStrategy {
   // Override getPayload untuk menambahkan custom payload
   async getPayload(authResult, params) {
-    // Ambil user dari authResult
     const { user } = authResult;
 
   return {
     ...await super.getPayload(authResult, params),
-    name: user.name,    // Tambahkan name user ke payload
-    email: user.email,  // Tambahkan email user ke payload
-    role: user.role     // Tambahkan role user ke payload
+    name: user.name,    
+    email: user.email,  
+    role: user.role    
   };
   }
 }
@@ -133,30 +136,7 @@ export const authentication = (app) => {
       res.status(400).send('Authentication failed');
     }
   });
- 
-  // app.get('/oauth/google/callback', async (ctx) => {
-  //   try {
-  //     const { accessToken, user } = await ctx.app.service('authentication').create({
-  //       strategy: 'google',
-  //       ...ctx.query
-  //     });
-  
-  //     // Set cookie dengan JWT token
-  //     await setCookie('feathers-jwt', accessToken, {
-  //       httpOnly: true,
-  //       secure: process.env.NODE_ENV === 'production', // hanya true di produksi
-  //       sameSite: 'strict',
-  //       maxAge: 24 * 60 * 60 * 1000, // 1 hari
-  //       path: '/', // Cookie berlaku di seluruh path
-  //     })(ctx);
-  
-  //     // Redirect ke dashboard tanpa mengekspos token di URL
-  //     ctx.redirect('/dashboard');
-  //   } catch (error) {
-  //     console.error('Authentication error:', error);
-  //     ctx.status(401).send('Authentication failed');
-  //   }
-  // });
+
   
   app.service('authentication').hooks({
     before: {

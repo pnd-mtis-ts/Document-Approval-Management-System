@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Akun</title>
+</head>
+<body>
+
+<h2>Edit User Account</h2>
+
+<form id="edit-account-form">
+  <label for="name">Name:</label>
+  <input type="text" id="name" name="name" required>
+
+  <label for="email">Email:</label>
+  <input type="email" id="email" name="email" required>
+
+  <label for="role">Role:</label>
+  <select id="role" name="role">
+    <option value="User">User</option>
+    <option value="Admin">Admin</option>
+    <option value="SuperAdmin">SuperAdmin</option>
+  </select>
+
+  <label for="jabatan">Jabatan:</label>
+  <input type="text" id="jabatan" name="jabatan">
+
+  <button type="submit">Simpan</button>
+</form>
+
+<script>
+  // Ambil ID user dari parameter URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const userId = urlParams.get('id');
+
+  // Fungsi untuk mendapatkan data user dan mengisi form
+  async function fetchUserData(userId) {
+    try {
+      const response = await fetch(`/users/${userId}`);
+      const user = await response.json();
+
+      document.getElementById('name').value = user.name;
+      document.getElementById('email').value = user.email;
+      document.getElementById('role').value = user.userAuth ? user.userAuth.role : 'User';
+      document.getElementById('jabatan').value = user.userProfile ? user.userProfile.jabatan : '';
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+  }
+
+  // Panggil fungsi untuk mengisi form ketika halaman di-load
+  window.onload = () => fetchUserData(userId);
+
+  // Fungsi untuk mengirim data edit user ke backend
+  document.getElementById('edit-account-form').addEventListener('submit', async function(event) {
+    event.preventDefault();
+
+    const updatedUser = {
+      name: document.getElementById('name').value,
+      email: document.getElementById('email').value,
+      role: document.getElementById('role').value,
+      jabatan: document.getElementById('jabatan').value
+    };
+
+    try {
+      const response = await fetch(`/users/${userId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(updatedUser)
+      });
+
+      if (response.ok) {
+        alert('User updated successfully');
+        window.location.href = 'list-akun.html'; // Kembali ke halaman list setelah berhasil mengedit
+      } else {
+        alert('Failed to update user');
+      }
+    } catch (error) {
+      console.error('Error updating user:', error);
+    }
+  });
+</script>
+
+</body>
+</html>
