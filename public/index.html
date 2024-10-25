@@ -4,20 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Management</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
-    <h1>User Management</h1>
-
-    <h2>Login</h2>
-    <form id="login-form">
-        <input type="email" id="login-email" placeholder="Email" required />
-        <input type="password" id="login-password" placeholder="Password" required />
-        <button type="submit">Login</button>
-        <button type="button" id="login-google-button">Login with Google</button>
-        <button id="logout-button" style="display: none;">Logout</button>
-    </form>
-
-    <div id="welcome-message"></div>
+<body class="bg-cover bg-center bg-no-repeat flex items-center justify-center min-h-screen" style="background-image: url('img/bg-login.png');">
+    <div class="bg-gray-100 p-8 rounded-xl shadow-xl w-full max-w-md">
+        <div class="flex justify-center mb-4">
+            <img src="img/3user.png" alt="" srcset="">
+        </div>       
+        <form id="login-form" class="space-y-4">
+            <input type="email" id="login-email" placeholder="Email" required class="w-full p-2 border border-gray-300 rounded-xl" />
+            <input type="password" id="login-password" placeholder="Password" required class="w-full p-2 border border-gray-300 rounded-xl" />
+            <button type="submit" class="w-full bg-[#038F87] text-white p-2 rounded-xl shadow-lg">Login</button>
+            <p class="text-center">Forgot Password?</p>
+            <button type="button" id="login-google-button" class="w-full bg-white shadow-lg text-black p-2 rounded-xl flex items-center justify-center space-x-2">
+                <img src="img/google.png" alt="Google Icon" class="w-5 h-5">
+                <span>Login with Google</span>
+            </button>
+        </form>
+        <div id="welcome-message" class="mt-4"></div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="app.js"></script>

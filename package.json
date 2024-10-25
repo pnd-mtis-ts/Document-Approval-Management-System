@@ -40,6 +40,7 @@
   "scripts": {
     "start": "node src",
     "dev": "nodemon src/",
+    "style": "npx tailwindcss -i ./src/css/input.css -o ./public/css/style.css --watch",
     "prettier": "npx prettier \"**/*.js\" --write",
     "mocha": "cross-env NODE_ENV=test mocha test/ --recursive --exit",
     "test": "cross-env NODE_ENV=test npm run migrate && npm run mocha",
