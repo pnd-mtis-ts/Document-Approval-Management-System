@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Input Document</title>
+    <style>
+        body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .dashboard { background: #f0f0f0; padding: 20px; border-radius: 5px; }
+        input, button { margin: 10px 0; padding: 5px; width: 100%; }
+        button { background: #007bff; color: white; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <h2>Upload Dokumen</h2>
+        <p id="user-info">Loading user information...</p>
+        <form id="upload-form" enctype="multipart/form-data">
+            <input type="text" id="judul_dokumen" name="judul_dokumen" placeholder="Judul Dokumen" required>
+            <input type="file" id="file_dokumen" name="file_dokumen" accept=".pdf" required>
+            <input type="date" id="tgl_deadline" name="tgl_deadline" required>
+            <button type="submit">Upload Dokumen</button>
+        </form>
+    </div>
+
+    <script src="https://unpkg.com/@feathersjs/client@^5.0.0/dist/feathers.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+        const app = feathers();
+        const restClient = feathers.rest('http://localhost:3030');
+        app.configure(restClient.axios(axios));
+        app.configure(feathers.authentication());
+
+        document.getElementById('upload-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData();
+            formData.append('judul_dokumen', document.getElementById('judul_dokumen').value);
+            formData.append('file_dokumen', document.getElementById('file_dokumen').files[0]);
+            formData.append('tgl_deadline', document.getElementById('tgl_deadline').value);
+
+            const token = localStorage.getItem('accessToken');
+            console.log('Retrieved token:', token); // Debugging statement
+
+            if (!token) {
+                console.error('No token found in local storage');
+                return;
+            }
+
+            try {
+                const response = await axios.post('http://localhost:3030/dokumen', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                console.log('Upload successful:', response.data);
+            } catch (error) {
+                console.error('Upload failed:', error);
+            }
+        });
+    </script>
+</body>
+</html>

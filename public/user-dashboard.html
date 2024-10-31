@@ -25,7 +25,8 @@
     <h1>Selamat datang di User Dashboard</h1>
     
     <h2 id="welcome-message"></h2>
-    
+
+    <button id="input-document">Input Document</button>
     <button id="logout-button">Logout</button>
     <button id="tosprAdmin">Ke halaman Super Admin</button>
     <button id="toAdminBtn">Ke halaman Admin</button>
@@ -33,6 +34,7 @@
     
     <script>
         const welcomeMessage = document.getElementById('welcome-message');
+        const keinputdoc = document.getElementById('input-document');
         const name = localStorage.getItem('userName');
         const role = localStorage.getItem('userRole');
         const kesprAdmin = document.getElementById('tosprAdmin');
@@ -42,7 +44,9 @@
             welcomeMessage.textContent = `Selamat datang, ${name}! Role anda: ${role}.`;
         }
         
-        
+        keinputdoc.addEventListener('click', () => {
+            window.location.href = 'inputdoc.html';
+        });
 
         kesprAdmin.addEventListener('click', () => {
             window.location.href = 'superadmin-dashboard.html';
@@ -62,8 +66,6 @@
             localStorage.clear();
             window.location.href = '/'; 
         });
-        
-        
     </script>
 </body>
 </html>

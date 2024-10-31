@@ -3,34 +3,71 @@ import { feathers } from '@feathersjs/feathers'
 import configuration from '@feathersjs/configuration'
 import { koa, rest, bodyParser, errorHandler, parseAuthentication, cors, serveStatic } from '@feathersjs/koa'
 import socketio from '@feathersjs/socketio'
-
 import { configurationValidator } from './configuration.js'
+import { logger } from './logger.js'
 import { logError } from './hooks/log-error.js'
 import { mysql } from './mysql.js'
 import { authentication } from './authentication.js'
 import { services } from './services/index.js'
 import { channels } from './channels.js'
-// import cookieParser from 'cookie-parser';
-// import usersProfile from './services/usersprofile/usersprofile.js';
+import multer from 'multer'
 
-const app = koa(feathers()) 
+const app = koa(feathers())
 
-// Load our app configuration (see config/ folder)
+// Load app configuration
 app.configure(configuration(configurationValidator))
 
 // Set up Koa middleware
-app.use(cors({ // sesuaikan dengan origin aplikasi client Anda
-  credentials: true
-}))
-
-// app.use(cookieParser())
+app.use(
+  cors({
+    // Adjust the origin as per your client application
+    credentials: true
+  })
+)
 app.use(serveStatic(app.get('public')))
-app.use(errorHandler())
+app.use(errorHandler({ logger }))
 app.use(parseAuthentication())
 app.use(bodyParser())
-// app.use(cookieParser())
 
-// Configure services and transports
+// Konfigurasi multer
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/')
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + '-' + file.originalname)
+  }
+})
+
+const upload = multer({ storage: storage })
+
+// Koa middleware to handle file uploads
+app.use(async (ctx, next) => {
+  if (ctx.path === '/dokumen' && ctx.method === 'POST') {
+    await new Promise((resolve, reject) => {
+      upload.single('file_dokumen')(ctx.req, ctx.res, (err) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve()
+        }
+      })
+    })
+    // Convert prototype-less object to regular object
+    const requestBody = Object.assign({}, ctx.req.body)
+    ctx.req.body = requestBody
+    console.log('Request Body:', ctx.req.body)
+    console.log('Uploaded File:', ctx.req.file)
+    if (ctx.req.file) {
+      ctx.req.body.file_url = ctx.req.file.path
+    }
+    // Attach req to context.params
+    ctx.feathers = { req: ctx.req }
+  }
+  await next()
+})
+
+// Configure services and real-time functionality
 app.configure(rest())
 app.configure(
   socketio({
@@ -40,13 +77,17 @@ app.configure(
   })
 )
 app.configure(mysql)
-
 app.configure(authentication)
-
 app.configure(services)
 app.configure(channels)
 
-// app.configure(usersProfile) 
+// Configure a middleware for 404s and the error handler
+app.use(async (ctx, next) => {
+  await next()
+  if (ctx.status === 404) {
+    ctx.body = { error: 'Not Found' }
+  }
+})
 
 // Register hooks that run on all service methods
 app.hooks({
@@ -57,6 +98,7 @@ app.hooks({
   after: {},
   error: {}
 })
+
 // Register application setup and teardown hooks here
 app.hooks({
   setup: [],

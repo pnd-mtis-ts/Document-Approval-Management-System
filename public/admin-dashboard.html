@@ -14,12 +14,14 @@
 
     <!-- Tombol untuk logout -->
     <button id="logout-button">Logout</button>
+    <button id="input-document">Input Document</button>
     <button id="tosprAdmin">Ke halaman SuperAdmin</button>
     <button id="toUser">ke halaman User</button>
 
     <script>
         // Ambil nama dan role dari localStorage atau API
         const welcomeMessage = document.getElementById('welcome-message');
+        const keinputdoc = document.getElementById('input-document');
         const name = localStorage.getItem('userName'); // Simpan nama saat login
         const role = localStorage.getItem('userRole'); // Simpan role saat login
         const kesprAdmin = document.getElementById('tosprAdmin');
@@ -29,6 +31,10 @@
         if (name && role) {
             welcomeMessage.textContent = `Selamat datang, ${name}! Role anda: ${role}.`;
         }
+
+        keinputdoc.addEventListener('click', () => {
+            window.location.href = 'inputdoc.html';
+        });
     
         adminBtn.addEventListener('click', () => {
             // Cek role pengguna
