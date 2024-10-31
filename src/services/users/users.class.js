@@ -9,7 +9,7 @@ export class UsersService extends KnexService {
   }
 
   async create(data, params) {
-    const { jabatan, role, ...userData } = data;
+    const { alamat, nomor_telepon, role, ...userData } = data;
 
     // Check if user already exists
     const existingUser = await this.find({
@@ -56,7 +56,8 @@ export class UsersService extends KnexService {
       // Create user profile with jabatan
       await trx('usersprofile').insert({
         user_id: newUser.id,
-        jabatan: jabatan
+        alamat: alamat,
+        nomor_telepon: nomor_telepon
       });
 
       // Create or fetch role
@@ -67,7 +68,7 @@ export class UsersService extends KnexService {
       } else {
         [roleId] = await trx('usersrole').insert({ name: role });
       }
-
+        
       // Create user auth entry
       await trx('usersauth').insert({
         user_id: newUser.id,
@@ -124,7 +125,7 @@ export class UsersService extends KnexService {
   } 
 
   async patch(id, data, params) {
-    const { jabatan, role, ...userData } = data;
+    const { alamat,nomor_telepon , role, ...userData } = data;
     
     // Start a transaction
     const trx = await this.knex.transaction();
@@ -134,14 +135,14 @@ export class UsersService extends KnexService {
       await trx('users').where({ id }).update(userData);
 
       // Update or create user profile
-      if (jabatan !== undefined) {
+      
         const existingProfile = await trx('usersprofile').where({ user_id: id }).first();
         if (existingProfile) {
-          await trx('usersprofile').where({ user_id: id }).update({ jabatan });
+          await trx('usersprofile').where({ user_id: id }).update({ alamat, nomor_telepon });
         } else {
-          await trx('usersprofile').insert({ user_id: id, jabatan });
+          await trx('usersprofile').insert({ user_id: id, alamat, nomor_telepon });
         }
-      }
+      
 
       // Update role if provided
       if (role !== undefined) {

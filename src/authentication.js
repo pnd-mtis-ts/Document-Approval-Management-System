@@ -14,7 +14,8 @@ class GoogleStrategy extends OAuthStrategy {
       name: profile.name,
       sub: profile.sub ,
       role: 'User',
-      jabatan: 'Karyawan',
+      alamat: 'Jalan',
+      nomor_telepon: '+62',
       pin: '000000'
     };
   }

@@ -7,6 +7,8 @@ export {}
 
 export {}
 
+export {}
+
 /**
  * Returns a  client for the cobaa app.
  *
@@ -27,6 +29,8 @@ export const createClient = (connection, authenticationOptions = {}) => {
   client.configure(userClient)
 
   client.configure(usersClient)
+
+  client.configure(jabatanClient)
 
   return client
 }

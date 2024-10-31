@@ -134,8 +134,9 @@ document.addEventListener('DOMContentLoaded', function () {
         email: document.getElementById('email').value,
         password: document.getElementById('password').value,
         role: document.getElementById('role').value,
-        jabatan: document.getElementById('jabatan').value,
-        pin: document.getElementById('pin').value
+        alamat: document.getElementById('alamat').value,
+        nomor_telepon: document.getElementById('nomor_telepon').value,
+        pin: document.getElementById('pin').value,
       }
 
       const response = await createUser(userData)

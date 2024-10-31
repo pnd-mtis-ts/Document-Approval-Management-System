@@ -38,7 +38,7 @@
   "main": "src/client",
   "type": "module",
   "scripts": {
-    "start": "node src",
+    "start": "concurrently --names \"DEV,STYLE\" --prefix \"name\" \"npm run dev\" \"npm run style\"",
     "dev": "nodemon src/",
     "style": "npx tailwindcss -i ./src/css/input.css -o ./public/css/style.css --watch",
     "prettier": "npx prettier \"**/*.js\" --write",
@@ -65,6 +65,7 @@
     "@feathersjs/socketio": "^5.0.30",
     "@feathersjs/transport-commons": "^5.0.30",
     "bcrypt": "^5.1.1",
+    "concurrently": "^9.0.1",
     "cookie": "^0.7.2",
     "cookie-parser": "^1.4.6",
     "knex": "^3.1.0",

@@ -11,7 +11,7 @@
   },
   "mysql": {
     "client": "mysql",
-    "connection": "mysql://root@localhost:3306/user"
+    "connection": "mysql://root:root@localhost:3306/user"
   },
   "authentication": {
     "entity": "user",

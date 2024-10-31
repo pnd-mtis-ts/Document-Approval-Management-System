@@ -16,7 +16,8 @@ export const usersSchema = {
     role: { type: 'string', enum: ['SuperAdmin', 'Admin', 'User','Aplikasi'] },
     googleId: { type: 'string' },
     sub: { type: 'string' },
-    jabatan: {type: 'string'}, 
+    alamat: { type: 'string'},
+    nomor_telepon: {type: 'string'}, 
     pin: {type: 'string'} 
   }
 }
