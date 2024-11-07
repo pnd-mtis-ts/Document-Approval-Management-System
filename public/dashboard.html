@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+</script>
+</head>
+<body>
+    <div class="w-64 h-screen bg-white shadow-xl text-white fixed">
+        <div class="p-4 text-black">
+            <div class="flex items-center space-x-2 my-5">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-11 w-11" fill="black" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z M4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                </svg>
+                <div id="user-info">
+                    <div id="id-user-display"></div>
+                    <div id="username-display" class="font-bold text-xl"></div>
+                </div>
+            </div>
+            <h1 class="font-bold text-xl text-center text-[#00716A]">Dokumen</h1>
+        </div>
+    </div>
+
+    <div class="flex-1 ml-64 p-8">
+        <div class="max-w-4xl mx-auto flex flex-col border-2 rounded-2xl p-4">
+            <div class="w-32 h-32 bg-[#1497EE] flex text-center items-center justify-center text-lg font-bold text-white rounded-xl shadow-xl mx-auto z-10">
+                Dokumen Masuk
+            </div>
+            <div id="dokumen-list" class="mt-5">
+            </div>
+        </div>
+    </div>
+
+    <!-- PDF Viewer Modal -->
+    <div id="pdf-viewer" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 hidden">
+      <div id="pdf-container" class="bg-white p-4 rounded-lg w-full max-w-4xl max-h-[80vh] overflow-y-auto relative">
+        <button onclick="closePDF()" class="absolute top-2 right-2 text-gray-700 hover:text-gray-900 text-2xl">&times;</button>
+        <!-- Halaman PDF akan ditambahkan di sini -->
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/@feathersjs/client@^5.0.0/dist/feathers.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <script>
+        const socket = io('http://localhost:3030');
+        const app = feathers();
+        app.configure(feathers.socketio(socket));
+        app.configure(feathers.authentication());
+
+        async function authenticate() {
+            try {
+                const token = localStorage.getItem('accessToken');
+                if (token) {
+                    await app.authenticate({
+                        strategy: 'jwt',
+                        accessToken: token
+                    });
+                } else {
+                    console.error('No access token found in localStorage');
+                }
+            } catch (error) {
+                console.error('Error authenticating:', error);
+            }
+        }
+
+        const userid = localStorage.getItem('userID');
+        const IDDisplay = document.getElementById('id-user-display');
+        if (userid && IDDisplay) {
+            IDDisplay.textContent = `${userid}`;
+        } else {
+            IDDisplay.textContent = 'Guest';
+        }
+
+        const userName = localStorage.getItem('userName');
+        // Get the element where you want to display the username
+        const usernameDisplay = document.getElementById('username-display');
+        // Set the content of the element
+        if (userName && usernameDisplay) {
+            usernameDisplay.textContent = `${userName}`;
+        } else {
+            usernameDisplay.textContent = 'Welcome, Guest!';
+        }
+
+        // Add this helper function in your dashboard.html script section
+        function formatDate(isoDate) {
+            const date = new Date(isoDate);
+            const options = { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric'
+            };
+            return date.toLocaleDateString('id-ID', options);
+        }
+
+        // Update showPDF function to handle the complete flow
+        function showPDF(filePath) {
+            const url = `http://localhost:3030/${filePath.replace(/^public[\\/]/, '')}`
+
+            // Dapatkan kontainer PDF
+            const pdfContainer = document.getElementById('pdf-container')
+            pdfContainer.innerHTML = '' // Bersihkan konten sebelumnya
+
+            // Memuat dokumen PDF
+            pdfjsLib.getDocument(url).promise.then(function(pdf) {
+                const numPages = pdf.numPages
+
+                // Untuk memastikan urutan halaman tetap, gunakan array untuk menyimpan promise render
+                const renderPromises = []
+
+                for (let pageNumber = 1; pageNumber <= numPages; pageNumber++) {
+                    renderPromises.push(
+                        pdf.getPage(pageNumber).then(function(page) {
+                            const viewport = page.getViewport({ scale: 1.5 })
+                            const canvas = document.createElement('canvas')
+                            const context = canvas.getContext('2d')
+                            canvas.height = viewport.height
+                            canvas.width = viewport.width
+                            canvas.style.marginBottom = '20px' // Opsional: menambahkan margin antar halaman
+
+                            const renderContext = {
+                                canvasContext: context,
+                                viewport: viewport
+                            }
+
+                            return page.render(renderContext).promise.then(function() {
+                                // Kembalikan canvas setelah render selesai
+                                return canvas
+                            })
+                        })
+                    )
+                }
+
+                // Setelah semua halaman selesai dirender, tambahkan ke kontainer dalam urutan
+                Promise.all(renderPromises).then(function(renderedPages) {
+                    renderedPages.forEach(function(canvas) {
+                        pdfContainer.appendChild(canvas)
+                    })
+                })
+            }).catch(function(error) {
+                console.error('Error loading PDF:', error)
+            })
+
+            // Tampilkan kontainer PDF jika sebelumnya disembunyikan
+            const pdfViewer = document.getElementById('pdf-viewer')
+            pdfViewer.classList.remove('hidden')
+        }
+
+        function closePDF() {
+            const pdfViewer = document.getElementById('pdf-viewer')
+            const pdfContainer = document.getElementById('pdf-container')
+            
+            pdfContainer.innerHTML = ' ' // Bersihkan konten PDF
+            pdfViewer.classList.add('hidden')
+        }
+
+        // Helper function to load and render PDF
+        async function loadPdf(pdfUrl, canvas, loadingDiv) {
+            try {
+                // Normalize path
+                const normalizedPath = pdfUrl.replace(/\\/g, '/');
+                const serverPdfUrl = new URL(normalizedPath, 'http://localhost:3030/').href;
+                
+                console.log('Attempting to load PDF from:', serverPdfUrl);
+
+                // Fetch with retry logic
+                const maxRetries = 3;
+                let attempt = 0;
+                let response;
+
+                while (attempt < maxRetries) {
+                    try {
+                        response = await fetch(serverPdfUrl);
+                        if (response.ok) break;
+                        attempt++;
+                        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+                    } catch (error) {
+                        if (attempt === maxRetries - 1) throw error;
+                        attempt++;
+                        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+                    }
+                }
+
+                if (!response.ok) {
+                    throw new Error(`Failed to load PDF: ${response.status} ${response.statusText}`);
+                }
+
+                const arrayBuffer = await response.arrayBuffer();
+                console.log('Fetched PDF arrayBuffer:', arrayBuffer);
+
+                // Load PDF from ArrayBuffer
+                const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
+                const page = await pdf.getPage(1);
+                
+                // Remove loading indicator
+                loadingDiv.remove();
+
+                // Render PDF
+                const viewport = page.getViewport({scale: 1.5});
+                const context = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+
+                await page.render({
+                    canvasContext: context,
+                    viewport: viewport
+                }).promise;
+
+            } catch (error) {
+                console.error('Error loading PDF:', error);
+                loadingDiv.innerHTML = `
+                    <div class="text-center">
+                        <p class="text-red-500 font-bold">Error loading PDF</p>
+                        <p class="text-gray-600 text-sm mt-2">${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Update your loadDokumen function where you create the dokumenItem
+        async function loadDokumen() {
+            try {
+                await authenticate();
+                const response = await app.service('dokumen').find();
+                const dokumenList = document.getElementById('dokumen-list');
+                dokumenList.innerHTML = '';
+
+                response.data.forEach((dokumen) => {
+                    const uploaderName = dokumen.user?.name || 'Unknown';
+                    const formattedDate = formatDate(dokumen.tgl_deadline);
+
+                    const dokumenItem = document.createElement('div');
+                    dokumenItem.className = 'flex flex-col items-center cursor-pointer hover:bg-gray-100';
+                    dokumenItem.onclick = () => {
+                        const filePath = dokumen.file_url.replace(/^public[\\/]/, '')
+                        showPDF(filePath)
+                    }
+                    dokumenItem.innerHTML = `
+                        <hr class="w-full my-2">
+                        <div class="my-5 flex items-center w-full">
+                            <img src="img/pdf-icon.png" class="w-16 h-16" alt="PDF Icon">
+                            <div class="ml-4">
+                                <h1 class="font-bold text-lg">${dokumen.judul_dokumen}</h1>
+                                <p>Uploaded by: ${uploaderName}</p>
+                            </div>
+                            <h1 class="ml-auto">${formattedDate}</h1>
+                        </div>
+                        <hr class="w-full my-2">
+                    `;
+                    dokumenList.appendChild(dokumenItem);
+                });
+            } catch (error) {
+                console.error('Error loading dokumen:', error);
+            }
+        }
+
+        function addDokumenToTable(dokumen) {
+            const dokumenList = document.getElementById('dokumen-list');
+            const dokumenItem = document.createElement('div');
+            dokumenItem.className = 'my-5 flex flex-col items-center';
+            dokumenItem.innerHTML = `
+                <hr class="w-full my-2">
+                <div class="my-5 flex items-center w-full">
+                    <img src="img/pdf-icon.png" class="w-16 h-16" alt="PDF Icon">
+                    <div class="ml-4">
+                        <h1 class="font-bold text-lg">${dokumen.judul_dokumen}</h1>
+                        <p>${dokumen.judul_dokumen}</p>
+                    </div>
+                    <h1 class="ml-auto">${dokumen.tgl_deadline}</h1>
+                </div>
+                <hr class="w-full my-2">
+            `;
+            dokumenList.appendChild(dokumenItem);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDokumen();
+
+            // Listen for real-time events
+            app.service('dokumen').on('created', dokumen => {
+                console.log('Dokumen created:', dokumen);
+                addDokumenToTable(dokumen);
+            });
+        });
+    </script>
+</body>
+</html>
