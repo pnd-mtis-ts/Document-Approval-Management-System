@@ -7,7 +7,8 @@ export class DokumenService extends KnexService {
 
     // Ensure file is correctly set in params
     if (params.file) {
-      data.file_url = params.file.path
+      // Menghapus 'public/' dari path file
+      data.file_url = params.file.path.replace(/^public[\\/]/, '')
     }
 
     // Ensure all required fields are present

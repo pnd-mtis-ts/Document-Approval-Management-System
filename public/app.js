@@ -136,7 +136,7 @@ document.addEventListener('DOMContentLoaded', function () {
         role: document.getElementById('role').value,
         alamat: document.getElementById('alamat').value,
         nomor_telepon: document.getElementById('nomor_telepon').value,
-        pin: document.getElementById('pin').value,
+        pin: document.getElementById('pin').value
       }
 
       const response = await createUser(userData)
@@ -175,6 +175,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const user = userResponse.data[0]
 
         localStorage.setItem('userName', user.name)
+        localStorage.setItem('userID', user.id) // Add this line
         const userRole = getUserRole(user)
         localStorage.setItem('userRole', userRole)
 
@@ -215,6 +216,7 @@ const handlePageLoad = async () => {
       localStorage.setItem('userName', userInfo.name)
       userRole = getUserRole(userInfo)
       localStorage.setItem('userRole', userRole)
+      localStorage.setItem('userID', userInfo.id)
 
       redirectToDashboard(userRole)
       removeHashFromURL()

@@ -3,6 +3,10 @@ import { DokumenService, getOptions } from './dokumen.class.js'
 import multer from 'multer'
 import path from 'path'
 
+import { dokumenResolver } from './dokumen.schema.js'
+// Fix the schema hooks import
+import hooks from '@feathersjs/schema'
+
 // Configure Multer storage
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -22,7 +26,6 @@ export * from './dokumen.class.js'
 
 export const dokumen = (app) => {
   const options = getOptions(app)
-
   // Use Koa middleware for file uploads
   app.use(async (ctx, next) => {
     if (ctx.path === '/dokumen' && ctx.method === 'POST') {
@@ -54,10 +57,14 @@ export const dokumen = (app) => {
     events: []
   })
 
-  // Set up hooks
-  app.service(dokumenPath).hooks({
+  // Get the service to apply hooks
+  const service = app.service(dokumenPath)
+
+  service.hooks({
     around: {
-      all: [authenticate('jwt')]
+      all: [authenticate('jwt')],
+      find: [hooks.resolveResult(dokumenResolver)],
+      get: [hooks.resolveResult(dokumenResolver)]
     },
     before: {
       create: [
@@ -93,6 +100,9 @@ export const dokumen = (app) => {
           return context
         }
       ]
+    },
+    after: {
+      // No after hooks needed since we're using resolvers
     }
   })
 }

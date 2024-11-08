@@ -4,15 +4,172 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Input Document</title>
-    <style>
-        body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .dashboard { background: #f0f0f0; padding: 20px; border-radius: 5px; }
-        input, button { margin: 10px 0; padding: 5px; width: 100%; }
-        button { background: #007bff; color: white; border: none; cursor: pointer; }
-    </style>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <div class="dashboard">
+    <div class="w-64 h-screen bg-white shadow-xl text-white fixed">
+        <div class="p-4 text-black">
+            <div class="flex items-center space-x-2 my-5">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-11 w-11" fill="black" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z M4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                </svg>
+                <div id="user-info">
+                    <div id="id-user-display"></div>
+                    <div id="username-display" class="font-bold text-xl"></div>
+                </div>
+            </div>
+            <h1 class="font-bold text-xl text-center text-[#00716A]">Dokumen</h1>
+        </div>
+    </div>
+
+    <div class="flex-1 ml-64 p-8">
+        <div class="max-w-lg mx-auto flex flex-col border-2 rounded-2xl p-4">
+            <form id="upload-form" enctype="multipart/form-data">
+            <!-- File Upload Area -->
+            <div class="flex justify-center">
+              <label for="file_dokumen" class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-100 hover:bg-gray-200">
+                <div id="upload-content" class="flex flex-col items-center justify-center pt-5 pb-6">
+                  <!-- SVG and Text -->
+                  <svg class="w-8 h-8 mb-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                    <!-- SVG Path -->
+                  </svg>
+                  <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">Pilih file</span></p>
+                  <p class="text-xs text-gray-500">PDF (MAX. 10MB)</p>
+                </div>
+                <input id="file_dokumen" type="file" name="file_dokumen" accept=".pdf" required class="hidden" />
+              </label>
+            </div>
+
+            <!-- Input Fields and Submit Button Inside the Container -->
+            <div class="mt-8">
+                <!-- Container Input Fields -->
+                <div class="flex flex-wrap -mx-2">
+                    <!-- Input 1 -->
+                    <div class="w-full md:w-1/2 px-2 mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="input1">
+                            Nomor Dokumen
+                        </label>
+                        <input
+                            class="shadow border rounded w-full py-2 px-3 text-gray-700" disabled
+                            id="input1"
+                            name="input1"
+                            type="text"
+                            placeholder="Masukkan input 1"
+                            required
+                        />
+                    </div>
+                    <!-- Input 2 -->
+                    <div class="w-full md:w-1/2 px-2 mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="input1">
+                            Tanggal Pengajuan
+                        </label>
+                        <input
+                            class="shadow border rounded w-full py-2 px-3 text-gray-700"
+                            id="input1"
+                            name="input1"
+                            type="date"
+                            placeholder="Masukkan input 1"
+                            required disabled
+                        />
+                    </div>
+                    <div class="w-full md:w-1/2 px-2 mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="input1">
+                            Judul Dokumen
+                        </label>
+                        <input
+                            class="shadow border rounded w-full py-2 px-3 text-gray-700"
+                            id="judul_dokumen"
+                            name="judul_dokumen"
+                            type="text"
+                            placeholder="Masukkan Judul Dokumen"
+                            required
+                        />
+                    </div>
+                    <div class="w-full md:w-1/2 px-2 mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="input1">
+                            Deadline
+                        </label>
+                        <input
+                            class="shadow border rounded w-full py-2 px-3 text-gray-700"
+                            id="tgl_deadline"
+                            name="tgl_deadline"
+                            type="date"
+                            placeholder="Masukkan Tanggal Deadline"
+                            required
+                        />
+                    </div>
+                    <div class="w-full px-2 mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="input1">
+                            Transaksi
+                        </label>
+                        <select id="countries" class="shadow border rounded w-full py-2 px-3 text-gray-700" disabled>
+                            <option selected>Workflow Approval</option>
+                            <option value="2">1</option>
+                            <option value="1">1</option>
+                          </select>
+                        
+                    </div>
+                    <div class="w-full px-2 mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="input1">
+                            Jenis Dokumen 
+                        </label>
+                        <select id="countries" class="shadow border rounded w-full py-2 px-3 text-gray-700" disabled>
+                            <option selected>Pilih Jenis</option>
+                            <option value="2">1</option>
+                            <option value="1">1</option>
+                          </select>
+                        
+                    </div>
+                    <div class="w-full px-2 mb-4 mt-2">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="input1">
+                            Penyetuju 1
+                        </label>
+                        <select id="countries" class="shadow border rounded w-full py-2 px-3 text-gray-700" disabled>
+                            <option selected>102111- Hardianto Puguh S.E., M.M.</option>
+                            <option value="2">1</option>
+                            <option value="1">1</option>
+                          </select>
+                        
+                    </div>
+                    <div class="w-full px-2 mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="input1">
+                            Penyetuju 2 
+                        </label>
+                        <select id="countries" class="shadow border rounded w-full py-2 px-3 text-gray-700" disabled>
+                            <option selected>102112- Noviana Firly  S.E., M.M.</option>
+                            <option value="2">1</option>
+                            <option value="1">1</option>
+                          </select>
+                        
+                    </div>
+                    <div class="w-full px-2 mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="input1">
+                            Penyetuju 3 
+                        </label>
+                        <select id="countries" class="shadow border rounded w-full py-2 px-3 text-gray-700" disabled>
+                            <option selected>102113- Indah Basudara S.E., M.M.</option>
+                            <option value="2">1</option>
+                            <option value="1">1</option>
+                          </select>
+                        
+                    </div>
+                    <!-- Continue with additional inputs as needed -->
+                </div>
+                <!-- Submit Button -->
+                <div class="mt-4 flex justify-center">
+                    <button
+                        type="submit"
+                        class="bg-[#038F87] hover:bg-[#1f7c77] text-white font-bold py-2 px-20 rounded-xl"
+                    >
+                        Kirim
+                    </button>
+                </div>
+            </div>
+        </form>
+        </div>
+    </div>
+
+    <!-- <div class="dashboard">
         <h2>Upload Dokumen</h2>
         <p id="user-info">Loading user information...</p>
         <form id="upload-form" enctype="multipart/form-data">
@@ -20,8 +177,9 @@
             <input type="file" id="file_dokumen" name="file_dokumen" accept=".pdf" required>
             <input type="date" id="tgl_deadline" name="tgl_deadline" required>
             <button type="submit">Upload Dokumen</button>
+            
         </form>
-    </div>
+    </div> -->
 
     <script src="https://unpkg.com/@feathersjs/client@^5.0.0/dist/feathers.js"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
@@ -30,6 +188,24 @@
         const restClient = feathers.rest('http://localhost:3030');
         app.configure(restClient.axios(axios));
         app.configure(feathers.authentication());
+
+        const userid = localStorage.getItem('userID');
+        const IDDisplay = document.getElementById('id-user-display');
+        if (userid && IDDisplay) {
+            IDDisplay.textContent = `${userid}`;
+        } else {
+            IDDisplay.textContent = 'Guest';
+        }
+
+        const userName = localStorage.getItem('userName');
+        // Get the element where you want to display the username
+        const usernameDisplay = document.getElementById('username-display');
+        // Set the content of the element
+        if (userName && usernameDisplay) {
+            usernameDisplay.textContent = `${userName}`;
+        } else {
+            usernameDisplay.textContent = 'Welcome, Guest!';
+        }
 
         document.getElementById('upload-form').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -57,6 +233,20 @@
                 console.log('Upload successful:', response.data);
             } catch (error) {
                 console.error('Upload failed:', error);
+            }
+        });
+
+        // JavaScript to display selected file name
+        const fileInput = document.getElementById('file_dokumen'); 
+        const uploadContent = document.getElementById('upload-content');
+
+        fileInput.addEventListener('change', function() {
+            if (fileInput.files.length > 0) {
+                const fileName = fileInput.files[0].name;
+                uploadContent.innerHTML = `
+                    <p class="mb-2 text-sm text-gray-500">File terpilih:</p>
+                    <p class="text-sm text-gray-700 mx-5">${fileName}</p>
+                `;
             }
         });
     </script>

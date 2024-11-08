@@ -13,11 +13,27 @@ export const dokumenSchema = {
     file_url: { type: 'string', default: 'none' },
     status: { type: 'string' },
     tgl_deadline: { type: 'string', format: 'date' },
-    user_id: { type: 'number' }
+    user_id: { type: 'number' },
+    user: { type: 'object' } // Add this line to define the 'user' property
   }
 }
 export const dokumenValidator = getValidator(dokumenSchema, dataValidator)
-export const dokumenResolver = resolve({})
+export const dokumenResolver = resolve({
+  properties: {
+    user: async (value, dokumen, context) => {
+      // Only try to resolve if we have a dokumen with user_id
+      if (dokumen && dokumen.user_id) {
+        try {
+          return await context.app.service('users').get(dokumen.user_id)
+        } catch (error) {
+          console.error('Error fetching user:', error)
+          return null
+        }
+      }
+      return null
+    }
+  }
+})
 
 export const dokumenExternalResolver = resolve({})
 
@@ -26,9 +42,13 @@ export const dokumenDataSchema = {
   $id: 'DokumenData',
   type: 'object',
   additionalProperties: false,
-  required: ['text'],
+  required: ['judul_dokumen', 'status', 'tgl_deadline'],
   properties: {
-    ...dokumenSchema.properties
+    judul_dokumen: { type: 'string' },
+    file_url: { type: 'string', default: 'none' },
+    status: { type: 'string' },
+    tgl_deadline: { type: 'string', format: 'date' }
+    // Exclude 'user_id' here since it's added in the before hook
   }
 }
 export const dokumenDataValidator = getValidator(dokumenDataSchema, dataValidator)
@@ -39,7 +59,6 @@ export const dokumenPatchSchema = {
   $id: 'DokumenPatch',
   type: 'object',
   additionalProperties: false,
-  required: [],
   properties: {
     ...dokumenSchema.properties
   }
