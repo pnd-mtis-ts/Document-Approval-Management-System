@@ -9,6 +9,14 @@ export {}
 
 export {}
 
+export {}
+
+export {}
+
+export {}
+
+export {}
+
 /**
  * Returns a  client for the cobaa app.
  *
@@ -31,6 +39,14 @@ export const createClient = (connection, authenticationOptions = {}) => {
   client.configure(usersClient)
 
   client.configure(jabatanClient)
+
+  client.configure(companyClient)
+
+  client.configure(signatureClient)
+
+  client.configure(aplikasiClient)
+
+  client.configure(transaksiClient)
 
   return client
 }

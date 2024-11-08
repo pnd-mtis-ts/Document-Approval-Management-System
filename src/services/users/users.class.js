@@ -75,10 +75,8 @@ export class UsersService extends KnexService {
         role_id: roleId
       });
 
-      // Commit the transaction
       await trx.commit();
 
-      // Fetch the created profile and auth
       const createdProfile = await this.knex('usersprofile').where({ user_id: newUser.id }).first();
       const createdAuth = await this.knex('usersauth')
         .select('usersauth.*', 'usersrole.name as role')
@@ -101,26 +99,51 @@ export class UsersService extends KnexService {
   async find(params) {
     const users = await super.find(params);
     
-    // Fetch associated user profiles and auth
     for (let user of users.data) {
-      user.userProfile = await this.knex('usersprofile').where({ user_id: user.id }).first();
+      // Get userProfile with role and jabatan
+      user.userProfile = await this.knex('usersprofile')
+        .select(
+          'usersprofile.*',
+          'usersrole.name as role',
+          'jabatan.nama_jabatan as jabatan'
+        )
+        .where({ 'usersprofile.user_id': user.id })
+        .leftJoin('usersauth', 'usersprofile.user_id', 'usersauth.user_id')
+        .leftJoin('usersrole', 'usersauth.role_id', 'usersrole.id')
+        .leftJoin('jabatan', 'usersauth.jabatan_id', 'jabatan.id')
+        .first();
+        
       user.userAuth = await this.knex('usersauth')
-        .select('usersauth.*', 'usersrole.name as role')
-        .join('usersrole', 'usersauth.role_id', 'usersrole.id')
+        .select('usersauth.*')
         .where({ 'usersauth.user_id': user.id })
         .first();
     }
+  
     return users;
   }
 
   async get(id, params) {
     const user = await super.get(id, params);
-    user.userProfile = await this.knex('usersprofile').where({ user_id: id }).first();
+    
+    // Get userProfile with role and jabatan
+    user.userProfile = await this.knex('usersprofile')
+      .select(
+        'usersprofile.*',
+        'usersrole.name as role',
+        'jabatan.nama_jabatan as jabatan'
+      )
+      .where({ 'usersprofile.user_id': id })
+      .leftJoin('usersauth', 'usersprofile.user_id', 'usersauth.user_id')
+      .leftJoin('usersrole', 'usersauth.role_id', 'usersrole.id')
+      .leftJoin('jabatan', 'usersauth.jabatan_id', 'jabatan.id')
+      .first();
+  
+    // Get userAuth without role and jabatan
     user.userAuth = await this.knex('usersauth')
-      .select('usersauth.*', 'usersrole.name as role')
-      .join('usersrole', 'usersauth.role_id', 'usersrole.id')
+      .select('usersauth.*')
       .where({ 'usersauth.user_id': id })
       .first();
+  
     return user;
   } 
 
@@ -133,8 +156,6 @@ export class UsersService extends KnexService {
     try {
       // Update user data
       await trx('users').where({ id }).update(userData);
-
-      // Update or create user profile
       
         const existingProfile = await trx('usersprofile').where({ user_id: id }).first();
         if (existingProfile) {
@@ -143,8 +164,6 @@ export class UsersService extends KnexService {
           await trx('usersprofile').insert({ user_id: id, alamat, nomor_telepon });
         }
       
-
-      // Update role if provided
       if (role !== undefined) {
         let roleId;
         const existingRole = await trx('usersrole').where({ name: role }).first();

@@ -40,6 +40,34 @@
         const kesprAdmin = document.getElementById('tosprAdmin');
         const keAdmin = document.getElementById('toAdminBtn');
         
+        const getUrlData = () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const encodedData = urlParams.get('data');
+            if (encodedData) {
+                return JSON.parse(decodeURIComponent(encodedData));
+            }
+                return null;
+            };
+
+            const userData = getUrlData();
+            if (userData) {
+
+            localStorage.setItem('userName', userData.name);
+            localStorage.setItem('userRole', userData.role);
+    
+            window.history.replaceState({}, document.title, window.location.pathname );
+            // Tampilkan pesan selamat datang
+            welcomeMessage.textContent = `Selamat datang, ${userData.name}! Role anda: ${userData.role}`;
+            } else {
+            const name = localStorage.getItem('userName');
+            const role = localStorage.getItem('userRole');
+            if (name && role) {
+                welcomeMessage.textContent = `Selamat datang, ${name}! Role anda: ${role}`;
+            } else {
+            window.location.href = '/';
+            }
+        }
+
         if (name && role) {
             welcomeMessage.textContent = `Selamat datang, ${name}! Role anda: ${role}.`;
         }

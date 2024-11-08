@@ -4,18 +4,18 @@ import { OAuthStrategy, oauth } from '@feathersjs/authentication-oauth';
 import { clearCookie, setCookie, parseCookie } from 'koa-cookies';
 
 class GoogleStrategy extends OAuthStrategy {
-  async getEntityData(profile) {
+  async getEntityData(profile,entity) {
     console.log('Google Profile:', profile);
     const baseData = await super.getEntityData(profile);
-    
+    // console.log('User is:', entity );
     return {
       ...baseData,
       email: profile.email,
       name: profile.name,
       sub: profile.sub ,
-      role: 'User',
       alamat: 'Jalan',
       nomor_telepon: '+62',
+      role: 'User',
       pin: '000000'
     };
   }
@@ -28,7 +28,8 @@ class GoogleStrategy extends OAuthStrategy {
           console.error('Token tidak tersedia');
           return '/';
       }
-      
+
+      console.log('Data user:', data);
       // Fungsi untuk mendapatkan informasi user
       const getCurrentUserInfo = async (token) => {
           try {
@@ -57,37 +58,38 @@ class GoogleStrategy extends OAuthStrategy {
       };
 
       const user = await getCurrentUserInfo(token);
-      
-      console.log('User data:', user);
-      console.log('User role:', user?.userAuth?.role);
-      console.log('Email:', user?.email);
-      console.log('Token:', token);
-
-      // localStorage.setItem('userRole', user.userAuth.role);
-
+      console.log(user);
       // Validasi data user
-      if (!user || !user.userAuth || !user.userAuth.role) {
+      if (!user || !user.userProfile || !user.userProfile.role) {
           console.error('Data user tidak lengkap');
           return '/';
       }
       // Redirect berdasarkan role
-      const userRole = user.userAuth.role;
+      const userData = {
+        name: data.user.name,
+        role: data.user.userProfile.role
+      };
+  
+      // Encode data user untuk URL
+      const encodedData = encodeURIComponent(JSON.stringify(userData));
+      
+      // Redirect berdasarkan role dengan data user
+      const userRole = userData.role;
       switch(userRole) {
-          case 'SuperAdmin':
-              return '/superadmin-dashboard.html';
-          case 'Admin':
-              return '/admin-dashboard.html';
-          case 'User':
-              return '/user-dashboard.html';
-          default:
-              return '/';
-      } 
-  } catch (error) {
+        case 'SuperAdmin':
+          return `/superadmin-dashboard.html?data=${encodedData}`;
+        case 'Admin':
+          return `/admin-dashboard.html?data=${encodedData}`;
+        case 'User':
+          return `/user-dashboard.html?data=${encodedData}`;
+        default:
+          return '/';
+      }
+    } catch (error) {
       console.error('Error dalam getRedirect:', error);
       return '/';
+    }
   }
-
-}
 
 }
 
@@ -138,7 +140,6 @@ export const authentication = (app) => {
     }
   });
 
-  
   app.service('authentication').hooks({
     before: {
       create: [

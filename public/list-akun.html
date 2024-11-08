@@ -72,8 +72,8 @@
             <td>${user.id}</td>
             <td>${user.name}</td>
             <td>${user.email}</td>
-            <td>${user.userAuth ? user.userAuth.role : 'Unknown'}</td>
-            <td>${user.userProfile ? user.userProfile.jabatan : 'Unknown'}</td>
+            <td>${user.userProfile ? user.userProfile.role : 'Unknown'}</td>
+            <td>${user.userAuth ? user.userProfile.jabatan : 'Unknown'}</td>
             <td>
               <button onclick="editUser(${user.id})">Edit</button>
               <button onclick="deleteUser(${user.id})">Delete</button>

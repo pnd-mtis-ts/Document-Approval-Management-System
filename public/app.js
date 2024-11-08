@@ -38,7 +38,7 @@ const loginUser = async (loginData) => {
 }
 
 const getUserRole = (user) => {
-  return user.userAuth.role
+  return user.userProfile.role
 }
 
 const getUserByEmail = async (email) => {
