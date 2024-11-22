@@ -2,36 +2,73 @@ import { KnexService } from '@feathersjs/knex'
 
 export class DokumenService extends KnexService {
   async create(data, params) {
-    console.log('Create method data:', data)
-    console.log('Create method params:', params)
+    const knex = this.Model;
 
-    // Ensure file is correctly set in params
-    if (params.file) {
-      // Menghapus 'public/' dari path file
-      data.file_url = params.file.path.replace(/^public[\\/]/, '')
+    try {
+      const result = await knex.transaction(async (trx) => {
+        // Log the incoming data for debugging
+        console.log('Incoming data:', data);
+
+        // Insert into 'dokumen' table
+        const insertedDokumen = await trx('dokumen').insert({
+          judul_dokumen: data.judul_dokumen,
+          file_url: data.file_url,
+          user_id: data.user_id,
+          status: data.status,
+          tgl_pengajuan: new Date(),
+        });
+
+        // Retrieve the inserted dokumen ID
+        // For MySQL, trx('dokumen').insert returns an array of inserted IDs
+        const dokumenId = insertedDokumen[0];
+        console.log('Inserted into dokumen with ID:', dokumenId);
+
+        // Check if file data exists
+        if (data.nama_file && data.tipe_file && data.size_file) {
+          // Insert into 'dokumenversion' table
+          await trx('dokumenversion').insert({
+            nama_file: data.nama_file,
+            tipe_file: data.tipe_file,
+            size_file: data.size_file,
+            dokumen_id: dokumenId,
+            status: 'pending',
+            tgl_upload: new Date(),
+            deskripsi: data.deskripsi || null,
+          });
+          console.log('Inserted into dokumenversion for dokumen ID:', dokumenId);
+        } else {
+          console.log('No file data to insert into dokumenversion.');
+        }
+
+        // Fetch and return the created document with version data
+        const createdDokumen = await trx('dokumen')
+          .select(
+            'dokumen.id',
+            'dokumen.judul_dokumen',
+            'dokumen.file_url',
+            'dokumen.user_id',
+            'dokumen.status',
+            'dokumen.tgl_pengajuan',
+            'dokumenversion.nama_file as nama_file',
+            'dokumenversion.tipe_file as tipe_file',
+            'dokumenversion.size_file',
+            'dokumenversion.tgl_upload',
+            'dokumenversion.version',
+            'dokumenversion.deskripsi'
+          )
+          .leftJoin('dokumenversion', 'dokumen.id', 'dokumenversion.dokumen_id')
+          .where('dokumen.id', dokumenId)
+          .first();
+
+        console.log('Created document with version data:', createdDokumen);
+        return createdDokumen;
+      });
+
+      return result;
+    } catch (error) {
+      console.error('Error in create:', error);
+      throw error;
     }
-
-    // Ensure all required fields are present
-    const requiredFields = ['judul_dokumen', 'tgl_deadline']
-    for (let field of requiredFields) {
-      if (!data[field]) {
-        throw new Error(`Field '${field}' harus diisi`)
-      }
-    }
-
-    // Add user_id from authenticated user
-    data.user_id = params.user.id
-
-    // Set default status
-    data.status = 'pending'
-
-    // Convert tgl_deadline to the correct format for the database (if needed)
-    if (data.tgl_deadline) {
-      data.tgl_deadline = new Date(data.tgl_deadline).toISOString().split('T')[0]
-    }
-
-    // Call the create method from KnexService
-    return super.create(data, params)
   }
 
   async find(params) {
@@ -43,10 +80,6 @@ export class DokumenService extends KnexService {
     // Add logic to check access if needed
     const { user } = params
     const dokumen = await super.get(id, params)
-
-    if (user.role !== 'admin' && dokumen.user_id !== user.id) {
-      throw new Error('Tidak memiliki akses ke dokumen ini')
-    }
 
     return dokumen
   }

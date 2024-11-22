@@ -1,21 +1,6 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/client.html
 import { feathers } from '@feathersjs/feathers'
 import authenticationClient from '@feathersjs/authentication-client'
-export {}
-
-export {}
-
-export {}
-
-export {}
-
-export {}
-
-export {}
-
-export {}
-
-export {}
 
 /**
  * Returns a  client for the cobaa app.
@@ -36,8 +21,6 @@ export const createClient = (connection, authenticationOptions = {}) => {
 
   client.configure(userClient)
 
-  client.configure(usersClient)
-
   client.configure(jabatanClient)
 
   client.configure(companyClient)
@@ -47,6 +30,8 @@ export const createClient = (connection, authenticationOptions = {}) => {
   client.configure(aplikasiClient)
 
   client.configure(transaksiClient)
+
+  client.configure(dokumenClient)
 
   return client
 }

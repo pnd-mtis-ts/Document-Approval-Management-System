@@ -1,5 +1,5 @@
 export async function up(knex) {
-  await knex.schema.createTable('doc_approval', (table) => {
+  await knex.schema.createTable('dokumenapproval', (table) => {
     table.increments('id').primary()
     table.integer('dokumen_id').unsigned().references('id').inTable('dokumen').onDelete('CASCADE')
     table.integer('user_id').unsigned().references('id').inTable('users').onDelete('CASCADE')

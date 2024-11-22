@@ -95,7 +95,6 @@
                             name="tgl_deadline"
                             type="date"
                             placeholder="Masukkan Tanggal Deadline"
-                            required
                         />
                     </div>
                     <div class="w-full px-2 mb-4">
@@ -213,10 +212,8 @@
             const formData = new FormData();
             formData.append('judul_dokumen', document.getElementById('judul_dokumen').value);
             formData.append('file_dokumen', document.getElementById('file_dokumen').files[0]);
-            formData.append('tgl_deadline', document.getElementById('tgl_deadline').value);
 
             const token = localStorage.getItem('accessToken');
-            console.log('Retrieved token:', token); // Debugging statement
 
             if (!token) {
                 console.error('No token found in local storage');

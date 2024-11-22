@@ -2,7 +2,7 @@ import { authenticate } from '@feathersjs/authentication'
 import { DokumenService, getOptions } from './dokumen.class.js'
 import multer from 'multer'
 import path from 'path'
-
+import { dokumenDataValidator,dokumenDataResolver } from './dokumen.schema.js'
 import { dokumenResolver } from './dokumen.schema.js'
 // Fix the schema hooks import
 import hooks from '@feathersjs/schema'
@@ -41,8 +41,7 @@ export const dokumen = (app) => {
       // Convert prototype-less object to regular object
       const requestBody = Object.assign({}, ctx.req.body)
       ctx.req.body = requestBody
-      console.log('Request Body:', ctx.req.body)
-      console.log('Uploaded File:', ctx.req.file)
+      console.log('Uploaded File: 222', ctx.req.file)
       if (ctx.req.file) {
         ctx.req.body.file_url = ctx.req.file.path
       }
@@ -76,9 +75,7 @@ export const dokumen = (app) => {
 
           // Assign context.data from req.body
           context.data = req.body
-
           console.log('Raw request:', req.body)
-          console.log('File:', req.file)
 
           if (!context.data.judul_dokumen) {
             throw new Error('Judul dokumen harus diisi')
@@ -93,10 +90,12 @@ export const dokumen = (app) => {
 
           if (req.file) {
             context.data.file_url = req.file.path
+            context.data.nama_file = req.file.originalname
+            context.data.tipe_file = req.file.mimetype
+            context.data.size_file = req.file.size
           }
 
           console.log('Final data:', context.data)
-
           return context
         }
       ]

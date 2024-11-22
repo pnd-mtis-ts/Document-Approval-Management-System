@@ -25,6 +25,7 @@ app.use(
   })
 )
 app.use(serveStatic(app.get('public')))
+app.use(serveStatic(app.get('uploads')))
 app.use(errorHandler({ logger }))
 app.use(parseAuthentication())
 app.use(bodyParser())
@@ -56,10 +57,12 @@ app.use(async (ctx, next) => {
     // Convert prototype-less object to regular object
     const requestBody = Object.assign({}, ctx.req.body)
     ctx.req.body = requestBody
-    console.log('Request Body:', ctx.req.body)
     console.log('Uploaded File:', ctx.req.file)
     if (ctx.req.file) {
       ctx.req.body.file_url = ctx.req.file.path
+      ctx.req.body.nama_file = ctx.req.file.originalname
+      ctx.req.body.tipe_file = ctx.req.file.mimetype
+      ctx.req.body.size_file = ctx.req.file.size
     }
     // Attach req to context.params
     ctx.feathers = { req: ctx.req }

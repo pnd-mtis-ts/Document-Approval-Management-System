@@ -36,7 +36,7 @@ const loginUser = async (loginData) => {
     return { error: error.message }
   }
 }
-
+ 
 const getUserRole = (user) => {
   return user.userProfile.role
 }

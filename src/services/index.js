@@ -16,5 +16,7 @@ export const services = (app) => {
 
   app.configure(jabatan)
 
-  app.configure(users), app.configure(dokumen)
+  app.configure(users)
+   
+  app.configure(dokumen)
 }

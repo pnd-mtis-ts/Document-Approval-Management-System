@@ -6,12 +6,13 @@ export const configurationSchema = {
   $id: 'configuration',
   type: 'object',
   additionalProperties: false,
-  required: ['host', 'port', 'public'],
+  required: ['host', 'port', 'public','uploads'],
   properties: {
     ...defaultAppSettings,
     host: { type: 'string' },
     port: { type: 'number' },
-    public: { type: 'string' }
+    public: { type: 'string' },
+    uploads: { type: 'string' }
   }
 }
 

@@ -6,34 +6,20 @@ import { dataValidator, queryValidator } from '../../validators.js'
 export const dokumenSchema = {
   $id: 'Dokumen',
   type: 'object',
-  required: ['judul_dokumen', 'status', 'tgl_deadline', 'user_id'],
+  required: ['judul_dokumen', 'status', 'user_id'],
   properties: {
     id: { type: 'number' },
     judul_dokumen: { type: 'string' },
     file_url: { type: 'string', default: 'none' },
     status: { type: 'string' },
-    tgl_deadline: { type: 'string', format: 'date' },
     user_id: { type: 'number' },
-    user: { type: 'object' } // Add this line to define the 'user' property
+    user: { type: 'object' },
+    version: { type: 'number'},
+    nama_file: { type: 'string'}
   }
 }
 export const dokumenValidator = getValidator(dokumenSchema, dataValidator)
-export const dokumenResolver = resolve({
-  properties: {
-    user: async (value, dokumen, context) => {
-      // Only try to resolve if we have a dokumen with user_id
-      if (dokumen && dokumen.user_id) {
-        try {
-          return await context.app.service('users').get(dokumen.user_id)
-        } catch (error) {
-          console.error('Error fetching user:', error)
-          return null
-        }
-      }
-      return null
-    }
-  }
-})
+export const dokumenResolver = resolve({})
 
 export const dokumenExternalResolver = resolve({})
 
@@ -42,13 +28,9 @@ export const dokumenDataSchema = {
   $id: 'DokumenData',
   type: 'object',
   additionalProperties: false,
-  required: ['judul_dokumen', 'status', 'tgl_deadline'],
+  required: ['judul_dokumen', 'status'],
   properties: {
-    judul_dokumen: { type: 'string' },
-    file_url: { type: 'string', default: 'none' },
-    status: { type: 'string' },
-    tgl_deadline: { type: 'string', format: 'date' }
-    // Exclude 'user_id' here since it's added in the before hook
+    ...dokumenSchema.properties
   }
 }
 export const dokumenDataValidator = getValidator(dokumenDataSchema, dataValidator)
