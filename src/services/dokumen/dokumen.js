@@ -1,55 +1,14 @@
 import { authenticate } from '@feathersjs/authentication'
 import { DokumenService, getOptions } from './dokumen.class.js'
-import multer from 'multer'
-import path from 'path'
-import { dokumenDataValidator,dokumenDataResolver } from './dokumen.schema.js'
 import { dokumenResolver } from './dokumen.schema.js'
-// Fix the schema hooks import
 import hooks from '@feathersjs/schema'
-
-// Configure Multer storage
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/')
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname))
-  }
-})
-
-const upload = multer({ storage: storage })
-
-export const dokumenPath = 'dokumen'
-export const dokumenMethods = ['find', 'get', 'create', 'patch', 'remove']
+import { dokumenPath, dokumenMethods } from './dokumen.shared.js'
 
 export * from './dokumen.class.js'
 
 export const dokumen = (app) => {
   const options = getOptions(app)
-  // Use Koa middleware for file uploads
-  app.use(async (ctx, next) => {
-    if (ctx.path === '/dokumen' && ctx.method === 'POST') {
-      await new Promise((resolve, reject) => {
-        upload.single('file_dokumen')(ctx.req, ctx.res, (err) => {
-          if (err) {
-            reject(err)
-          } else {
-            resolve()
-          }
-        })
-      })
-      // Convert prototype-less object to regular object
-      const requestBody = Object.assign({}, ctx.req.body)
-      ctx.req.body = requestBody
-      console.log('Uploaded File: 222', ctx.req.file)
-      if (ctx.req.file) {
-        ctx.req.body.file_url = ctx.req.file.path
-      }
-      ctx.feathers = { req: ctx.req }
-    }
-    await next()
-  })
-
+  
   // Register the service
   app.use(dokumenPath, new DokumenService(options), {
     methods: dokumenMethods,
@@ -93,6 +52,7 @@ export const dokumen = (app) => {
             context.data.nama_file = req.file.originalname
             context.data.tipe_file = req.file.mimetype
             context.data.size_file = req.file.size
+            context.data.nama_file_multer = req.file.filename
           }
 
           console.log('Final data:', context.data)

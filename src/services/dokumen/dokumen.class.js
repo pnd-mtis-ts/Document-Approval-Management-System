@@ -1,4 +1,5 @@
 import { KnexService } from '@feathersjs/knex'
+import path from 'path'
 
 export class DokumenService extends KnexService {
   async create(data, params) {
@@ -6,55 +7,71 @@ export class DokumenService extends KnexService {
 
     try {
       const result = await knex.transaction(async (trx) => {
-        // Log the incoming data for debugging
+      
         console.log('Incoming data:', data);
-
-        // Insert into 'dokumen' table
+        
         const insertedDokumen = await trx('dokumen').insert({
+          nomor_dokumen: data.nomor_dokumen,
           judul_dokumen: data.judul_dokumen,
-          file_url: data.file_url,
           user_id: data.user_id,
           status: data.status,
-          tgl_pengajuan: new Date(),
+          tgl_pengajuan: data.tgl_pengajuan || new Date(),
         });
 
-        // Retrieve the inserted dokumen ID
-        // For MySQL, trx('dokumen').insert returns an array of inserted IDs
         const dokumenId = insertedDokumen[0];
-        console.log('Inserted into dokumen with ID:', dokumenId);
 
-        // Check if file data exists
         if (data.nama_file && data.tipe_file && data.size_file) {
-          // Insert into 'dokumenversion' table
+          
+          const maxVersionResult = await trx('dokumenversion')
+            .where('dokumen_id', dokumenId)
+            .max('version as maxVersion')
+            .first();
+
+          const currentMaxVersion = maxVersionResult.maxVersion || 0;
+          const newVersion = currentMaxVersion + 1;
+
+          const ext = path.extname(data.nama_file); // Contoh: '.pdf'
+          const baseName = path.basename(data.nama_file, ext); // Contoh: 'bitbyte'
+
+          const prefixedNamaFile = data.id_multer
+          ? `${data.id_multer}-${baseName}_versi_${newVersion}${ext}`
+          : `${baseName}_versi_${newVersion}${ext}`;
+
+          const fileUrl = path.join('uploads', prefixedNamaFile);
+
           await trx('dokumenversion').insert({
-            nama_file: data.nama_file,
+            nama_file: prefixedNamaFile,
+            file_url: fileUrl,
             tipe_file: data.tipe_file,
             size_file: data.size_file,
             dokumen_id: dokumenId,
             status: 'pending',
             tgl_upload: new Date(),
             deskripsi: data.deskripsi || null,
+            version: newVersion,
+            id_multer: data.id_multer || null,
           });
           console.log('Inserted into dokumenversion for dokumen ID:', dokumenId);
         } else {
           console.log('No file data to insert into dokumenversion.');
         }
 
-        // Fetch and return the created document with version data
         const createdDokumen = await trx('dokumen')
           .select(
             'dokumen.id',
+            'dokumen.nomor_dokumen',
             'dokumen.judul_dokumen',
-            'dokumen.file_url',
             'dokumen.user_id',
             'dokumen.status',
             'dokumen.tgl_pengajuan',
-            'dokumenversion.nama_file as nama_file',
-            'dokumenversion.tipe_file as tipe_file',
+            'dokumenversion.id_multer',
+            'dokumenversion.nama_file ',
+            'dokumenversion.tipe_file ',
             'dokumenversion.size_file',
             'dokumenversion.tgl_upload',
             'dokumenversion.version',
-            'dokumenversion.deskripsi'
+            'dokumenversion.deskripsi',
+            'dokumenversion.file_url',
           )
           .leftJoin('dokumenversion', 'dokumen.id', 'dokumenversion.dokumen_id')
           .where('dokumen.id', dokumenId)
@@ -72,12 +89,12 @@ export class DokumenService extends KnexService {
   }
 
   async find(params) {
-    // Call the find method from KnexService without restrictions
+
     return super.find(params)
   }
 
   async get(id, params) {
-    // Add logic to check access if needed
+    
     const { user } = params
     const dokumen = await super.get(id, params)
 
@@ -85,7 +102,7 @@ export class DokumenService extends KnexService {
   }
 
   async patch(id, data, params) {
-    // Add logic to check access and validation if needed
+    
     const { user } = params
     const dokumen = await this.get(id, params)
 
@@ -93,7 +110,6 @@ export class DokumenService extends KnexService {
       throw new Error('Tidak memiliki akses untuk mengubah dokumen ini')
     }
 
-    // Only allow certain updates
     const allowedUpdates = ['judul_dokumen', 'tgl_deadline', 'status']
     Object.keys(data).forEach((key) => {
       if (!allowedUpdates.includes(key)) {

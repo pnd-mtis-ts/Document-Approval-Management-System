@@ -36,7 +36,7 @@ const storage = multer.diskStorage({
     cb(null, 'uploads/')
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + '-' + file.originalname)
+    cb(null, file.originalname)
   }
 })
 
@@ -63,6 +63,7 @@ app.use(async (ctx, next) => {
       ctx.req.body.nama_file = ctx.req.file.originalname
       ctx.req.body.tipe_file = ctx.req.file.mimetype
       ctx.req.body.size_file = ctx.req.file.size
+      ctx.req.body.nama_file_multer = ctx.req.file.filename
     }
     // Attach req to context.params
     ctx.feathers = { req: ctx.req }

@@ -10,7 +10,6 @@ export const dokumenSchema = {
   properties: {
     id: { type: 'number' },
     judul_dokumen: { type: 'string' },
-    file_url: { type: 'string', default: 'none' },
     status: { type: 'string' },
     user_id: { type: 'number' },
     user: { type: 'object' },

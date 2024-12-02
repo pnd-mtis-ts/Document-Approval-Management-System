@@ -50,11 +50,11 @@
                             Nomor Dokumen
                         </label>
                         <input
-                            class="shadow border rounded w-full py-2 px-3 text-gray-700" disabled
-                            id="input1"
-                            name="input1"
+                            class="shadow border rounded w-full py-2 px-3 text-gray-700" 
+                            id="nomor_dokumen"
+                            name="nomor_dokumen"
                             type="text"
-                            placeholder="Masukkan input 1"
+                            placeholder="Nomor Dokumen"
                             required
                         />
                     </div>
@@ -65,11 +65,11 @@
                         </label>
                         <input
                             class="shadow border rounded w-full py-2 px-3 text-gray-700"
-                            id="input1"
-                            name="input1"
+                            id="tgl_pengajuan"
+                            name="tgl_pengajuan"
                             type="date"
                             placeholder="Masukkan input 1"
-                            required disabled
+                            required
                         />
                     </div>
                     <div class="w-full md:w-1/2 px-2 mb-4">
@@ -99,12 +99,21 @@
                     </div>
                     <div class="w-full px-2 mb-4">
                         <label class="block text-gray-700 text-sm font-bold mb-2" for="input1">
+                            Company
+                        </label>
+                        <select id="countries" class="shadow border rounded w-full py-2 px-3 text-gray-700" >
+                            <option value="2">PT TIGA SERANGKAI SOLO</option>
+                            <option value="1">Assalam</option>
+                          </select>
+                        
+                    </div>
+                    <div class="w-full px-2 mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="input1">
                             Transaksi
                         </label>
-                        <select id="countries" class="shadow border rounded w-full py-2 px-3 text-gray-700" disabled>
-                            <option selected>Workflow Approval</option>
-                            <option value="2">1</option>
-                            <option value="1">1</option>
+                        <select id="countries" class="shadow border rounded w-full py-2 px-3 text-gray-700" >
+                            <option value="2">MasterFlow</option>
+                            <option value="1">Custom</option>
                           </select>
                         
                     </div>
@@ -112,10 +121,10 @@
                         <label class="block text-gray-700 text-sm font-bold mb-2" for="input1">
                             Jenis Dokumen 
                         </label>
-                        <select id="countries" class="shadow border rounded w-full py-2 px-3 text-gray-700" disabled>
+                        <select id="countries" class="shadow border rounded w-full py-2 px-3 text-gray-700" >
                             <option selected>Pilih Jenis</option>
-                            <option value="2">1</option>
-                            <option value="1">1</option>
+                            <option value="2">Dokumen 1</option>
+                            <option value="1">Dokumen 2</option>
                           </select>
                         
                     </div>
@@ -168,26 +177,10 @@
         </div>
     </div>
 
-    <!-- <div class="dashboard">
-        <h2>Upload Dokumen</h2>
-        <p id="user-info">Loading user information...</p>
-        <form id="upload-form" enctype="multipart/form-data">
-            <input type="text" id="judul_dokumen" name="judul_dokumen" placeholder="Judul Dokumen" required>
-            <input type="file" id="file_dokumen" name="file_dokumen" accept=".pdf" required>
-            <input type="date" id="tgl_deadline" name="tgl_deadline" required>
-            <button type="submit">Upload Dokumen</button>
-            
-        </form>
-    </div> -->
-
     <script src="https://unpkg.com/@feathersjs/client@^5.0.0/dist/feathers.js"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script>
-        const app = feathers();
-        const restClient = feathers.rest('http://localhost:3030');
-        app.configure(restClient.axios(axios));
-        app.configure(feathers.authentication());
-
+   
         const userid = localStorage.getItem('userID');
         const IDDisplay = document.getElementById('id-user-display');
         if (userid && IDDisplay) {
@@ -206,13 +199,46 @@
             usernameDisplay.textContent = 'Welcome, Guest!';
         }
 
+        const fileInput = document.getElementById('file_dokumen'); 
+        const uploadContent = document.getElementById('upload-content');
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                console.clear();
+                console.log('Selected File Details:', {
+                    id_multer: file.lastModified,
+                    isi_file: file
+                });
+            }
+        });
+
+        fileInput.addEventListener('change', function() {
+            if (fileInput.files.length > 0) {
+                const fileName = fileInput.files[0].name;
+                uploadContent.innerHTML = `
+                    <p class="mb-2 text-sm text-gray-500">File terpilih:</p>
+                    <p class="text-sm text-gray-700 mx-5">${fileName}</p>
+                `;
+            }
+        });
+
         document.getElementById('upload-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
+            const fileInput = document.getElementById('file_dokumen');
+            const file = fileInput.files[0];
+            if (!file) {
+                console.error('No file selected.');
+                return;
+            }
+
             const formData = new FormData();
+            formData.append('nomor_dokumen', document.getElementById('nomor_dokumen').value);
+            formData.append('tgl_pengajuan', document.getElementById('tgl_pengajuan').value);
             formData.append('judul_dokumen', document.getElementById('judul_dokumen').value);
             formData.append('file_dokumen', document.getElementById('file_dokumen').files[0]);
-
+            formData.append('id_multer', file.lastModified);
             const token = localStorage.getItem('accessToken');
 
             if (!token) {
@@ -232,20 +258,7 @@
                 console.error('Upload failed:', error);
             }
         });
-
-        // JavaScript to display selected file name
-        const fileInput = document.getElementById('file_dokumen'); 
-        const uploadContent = document.getElementById('upload-content');
-
-        fileInput.addEventListener('change', function() {
-            if (fileInput.files.length > 0) {
-                const fileName = fileInput.files[0].name;
-                uploadContent.innerHTML = `
-                    <p class="mb-2 text-sm text-gray-500">File terpilih:</p>
-                    <p class="text-sm text-gray-700 mx-5">${fileName}</p>
-                `;
-            }
-        });
+        
     </script>
 </body>
 </html>
