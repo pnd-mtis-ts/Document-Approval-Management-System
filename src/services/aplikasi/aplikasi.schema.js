@@ -7,12 +7,12 @@ export const aplikasiSchema = {
   $id: 'Aplikasi',
   type: 'object',
   additionalProperties: false,
-  required: ['name','company_id'],
+  required: ['name', 'company_id'],
   properties: {
     id: { type: 'number' },
     name: { type: 'string' },
-    company_id: { type: 'number'},
-    user_id: { type: 'number'}
+    company_id: { type: 'number' },
+    user_id: { type: 'number' }
   }
 }
 export const aplikasiValidator = getValidator(aplikasiSchema, dataValidator)
@@ -25,7 +25,7 @@ export const aplikasiDataSchema = {
   $id: 'AplikasiData',
   type: 'object',
   additionalProperties: false,
-  required: ['name','company_id','user_id'],
+  required: ['name', 'company_id'],
   properties: {
     ...aplikasiSchema.properties
   }
