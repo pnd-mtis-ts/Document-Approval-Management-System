@@ -23,7 +23,7 @@
     </div>
 
     <div class="flex-1 ml-64 p-8">
-        <div class="max-w-lg mx-auto flex flex-col border-2 rounded-2xl p-4">
+        <div class="max-w-4xl mx-auto flex flex-col border-2 rounded-2xl p-4">
             <form id="upload-form" enctype="multipart/form-data">
             <!-- File Upload Area -->
             <div class="flex justify-center">
@@ -81,7 +81,7 @@
                             id="judul_dokumen"
                             name="judul_dokumen"
                             type="text"
-                            placeholder="Masukkan Judul Dokumen"
+                            placeholder="Judul Dokumen"
                             required
                         />
                     </div>
@@ -97,71 +97,274 @@
                             placeholder="Masukkan Tanggal Deadline"
                         />
                     </div>
-                    <div class="w-full px-2 mb-4">
-                        <label class="block text-gray-700 text-sm font-bold mb-2" for="input1">
-                            Company
-                        </label>
-                        <select id="countries" class="shadow border rounded w-full py-2 px-3 text-gray-700" >
-                            <option value="2">PT TIGA SERANGKAI SOLO</option>
-                            <option value="1">Assalam</option>
-                          </select>
+                    
+                        <div class="w-full md:w-1/2 px-2 mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="transaksi">
+                                Transaksi
+                            </label>
+                            <select id="transaksi" name="transaksi" class="shadow border rounded w-full py-2 px-3 text-gray-700">
+                                <option value="cuti">Pengajuan Cuti</option>
+                                <option value="proposal">Pengajuan Proposal</option>
+                            </select>
+                        </div>
+                        <div class="w-full md:w-1/2 px-2 mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="masterflow">
+                                Masterflow
+                            </label>
+                            <select id="masterflow" name="masterflow" class="shadow border rounded w-full py-2 px-3 text-gray-700">
+                                <option value="masterflow">Masterflow</option>
+                                <option value="custom">Custom</option>
+                            </select>
+                        </div>
+                    
+                        <div class="w-full md:w-1/3 px-2 mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="nama_approval_1">
+                                Nama Approval 
+                            </label>
+                            <input
+                                class="shadow border rounded w-full py-2 px-3 text-gray-700"
+                                id="nama_approval_1"
+                                name="nama_approval_1"
+                                type="text"
+                                placeholder="Masukkan Nama Approval 1"
+                                required
+                            />
+                        </div>
+                        <div class="w-full md:w-1/3 px-2 mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="email_approval_1">
+                                Email 
+                            </label>
+                            <input
+                                class="shadow border rounded w-full py-2 px-3 text-gray-700"
+                                id="email_approval_1"
+                                name="email_approval_1"
+                                type="email"
+                                placeholder="Masukkan Email Approval 1"
+                                required
+                            />
+                        </div>
+                        <div class="w-full md:w-1/3 px-2 mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="email_approval_1">
+                                Jabatan 
+                            </label>
+                            <input
+                                class="shadow border rounded w-full py-2 px-3 text-gray-700"
+                                id="jabatan_approval_1"
+                                name="jabatan_approval_1"
+                                type="text"
+                                placeholder="Masukkan Jabatan"
+                                
+                            />
+                        </div>
+                        <div class="w-full md:w-1/3 px-2 mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="urutan_approval_1">
+                                Urutan 
+                            </label>
+                            <input
+                                class="shadow border rounded w-1/4 py-2 px-3 text-gray-700"
+                                id="urutan_approval_1"
+                                name="urutan_approval_1"
+                                type="number"
+                                value="1"
+                                readonly
+                            />
                         
+                            <button
+                            type="button"
+                            id="add-approval"
+                            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2"
+                        >
+                            +
+                        </button>
+                    </div>
+                    <div class="mb-2">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="jenis_group_1">
+                            Jenis Group
+                        </label>
+                        <select
+                            class="shadow border rounded w-full py-2 px-3 text-gray-700"
+                            id="jenis_group_1"
+                            name="jenis_group_1"
+                            required
+                        >
+                            <option value="all" selected>Semua harus menyetujui</option>
+                            <option value="any">Salah satu saja</option>
+                        </select>
+                    </div>
+
+                        <div id="approval-container-1"></div>
+                    
+
+                    <!-- Approval 2 -->
+                    <div class="w-full flex flex-wrap px-2 mb-4">
+                        <div class="w-full md:w-1/3 px-2 mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="nama_approval_2">
+                            </label>
+                            <input
+                                class="shadow border rounded w-full py-2 px-3 text-gray-700"
+                                id="nama_approval_2"
+                                name="nama_approval_2"
+                                type="text"
+                                placeholder="Masukkan Nama Approval 2"
+                                
+                            />
+                        </div>
+                        <div class="w-full md:w-1/3 px-2 mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="email_approval_2">
+                                
+                            </label>
+                            <input
+                                class="shadow border rounded w-full py-2 px-3 text-gray-700"
+                                id="email_approval_2"
+                                name="email_approval_2"
+                                type="email"
+                                placeholder="Masukkan Email Approval 2"
+                                
+                            />
+                        </div>
+                        <div class="w-full md:w-1/3 px-2 mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="jabatan_approval_2">
+                                
+                            </label>
+                            <input
+                                class="shadow border rounded w-full py-2 px-3 text-gray-700"
+                                id="jabatan_approval_2"
+                                name="jabatan_approval_2"
+                                type="text"
+                                placeholder="Masukkan Jabatan"
+                                
+                            />
+                        </div>
+                        <div class="w-full md:w-1/3 px-2 mb-4 flex items-center">
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="urutan_approval_2">
+                                
+                            </label>
+                            <input
+                                class="shadow border rounded w-1/4 py-2 px-3 text-gray-700"
+                                id="urutan_approval_2"
+                                name="urutan_approval_2"
+                                type="number"
+                                value="2"
+                                readonly
+                            />
+                            <button
+                            type="button"
+                            id="add-approval-2"
+                            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2"
+                        >
+                            +
+                        </button>
+                        
+                        </div>
+                        <div class="mb-2">
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="jenis_group_2">
+                                Jenis Group
+                            </label>
+                            <select
+                                class="shadow border rounded w-full py-2 px-3 text-gray-700"
+                                id="jenis_group_2"
+                                name="jenis_group_2"
+                                required
+                            >
+                                <option value="all" selected>Semua harus menyetujui</option>
+                                <option value="any">Salah satu saja</option>
+                            </select>
+                        </div>
+
+                        <div id="approval-container-2"></div>
+                    </div>
+
+                    <!-- Approval 3 -->
+
+                    <div class="w-full flex flex-wrap px-2 mb-4">
+                        <div class="w-full md:w-1/3 px-2 mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="nama_approval_3">
+                                
+                            </label>
+                            <input
+                                class="shadow border rounded w-full py-2 px-3 text-gray-700"
+                                id="nama_approval_3"
+                                name="nama_approval_3"
+                                type="text"
+                                placeholder="Masukkan Nama Approval 3"
+                                
+                            />
+                        </div>
+                        <div class="w-full md:w-1/3 px-2 mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="email_approval_3">
+                                
+                            </label>
+                            <input
+                                class="shadow border rounded w-full py-2 px-3 text-gray-700"
+                                id="email_approval_3"
+                                name="email_approval_3"
+                                type="email"
+                                placeholder="Masukkan Email Approval 3"
+                                
+                            />
+                        </div>
+                        <div class="w-full md:w-1/3 px-2 mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="jabatan_approval_3">
+                                
+                            </label>
+                            <input
+                                class="shadow border rounded w-full py-2 px-3 text-gray-700"
+                                id="jabatan_approval_3"
+                                name="jabatan_approval_3"
+                                type="text"
+                                placeholder="Masukkan Jabatan"
+                                
+                            />
+                        </div>
+                        <div class="w-full md:w-1/3 px-2 mb-4 flex">
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="urutan_approval_3">
+                                
+                            </label>
+                            <input
+                                class="shadow border rounded w-1/4 py-2 px-3 text-gray-700"
+                                id="urutan_approval_3"
+                                name="urutan_approval_3"
+                                type="number"
+                                value="3"
+                                readonly
+                            />
+                            <button
+                            type="button"
+                            id="add-approval-3"
+                            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2"
+                            >
+                            +
+                            </button>
+                        </div>
+                        <div class="mb-2">
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="jenis_group_3">
+                                Jenis Group
+                            </label>
+                            <select
+                                class="shadow border rounded w-full py-2 px-3 text-gray-700"
+                                id="jenis_group_3"
+                                name="jenis_group_3"
+                                required
+                            >
+                                <option value="all" selected>Semua harus menyetujui</option>
+                                <option value="any">Salah satu saja</option>
+                            </select>
+                        </div>
+
+                        <div id="approval-container-3"></div>
                     </div>
                     <div class="w-full px-2 mb-4">
-                        <label class="block text-gray-700 text-sm font-bold mb-2" for="input1">
-                            Transaksi
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="komentar">
+                            Komentar
                         </label>
-                        <select id="countries" class="shadow border rounded w-full py-2 px-3 text-gray-700" >
-                            <option value="2">MasterFlow</option>
-                            <option value="1">Custom</option>
-                          </select>
-                        
+                        <textarea
+                            class="shadow border rounded w-full py-2 px-3 text-gray-700"
+                            id="komentar"
+                            name="komentar"
+                            placeholder="Masukkan Komentar"
+                            rows="4"
+                        ></textarea>
                     </div>
-                    <div class="w-full px-2 mb-4">
-                        <label class="block text-gray-700 text-sm font-bold mb-2" for="input1">
-                            Jenis Dokumen 
-                        </label>
-                        <select id="countries" class="shadow border rounded w-full py-2 px-3 text-gray-700" >
-                            <option selected>Pilih Jenis</option>
-                            <option value="2">Dokumen 1</option>
-                            <option value="1">Dokumen 2</option>
-                          </select>
-                        
-                    </div>
-                    <div class="w-full px-2 mb-4 mt-2">
-                        <label class="block text-gray-700 text-sm font-bold mb-2" for="input1">
-                            Penyetuju 1
-                        </label>
-                        <select id="countries" class="shadow border rounded w-full py-2 px-3 text-gray-700" disabled>
-                            <option selected>102111- Hardianto Puguh S.E., M.M.</option>
-                            <option value="2">1</option>
-                            <option value="1">1</option>
-                          </select>
-                        
-                    </div>
-                    <div class="w-full px-2 mb-4">
-                        <label class="block text-gray-700 text-sm font-bold mb-2" for="input1">
-                            Penyetuju 2 
-                        </label>
-                        <select id="countries" class="shadow border rounded w-full py-2 px-3 text-gray-700" disabled>
-                            <option selected>102112- Noviana Firly  S.E., M.M.</option>
-                            <option value="2">1</option>
-                            <option value="1">1</option>
-                          </select>
-                        
-                    </div>
-                    <div class="w-full px-2 mb-4">
-                        <label class="block text-gray-700 text-sm font-bold mb-2" for="input1">
-                            Penyetuju 3 
-                        </label>
-                        <select id="countries" class="shadow border rounded w-full py-2 px-3 text-gray-700" disabled>
-                            <option selected>102113- Indah Basudara S.E., M.M.</option>
-                            <option value="2">1</option>
-                            <option value="1">1</option>
-                          </select>
-                        
-                    </div>
-                    <!-- Continue with additional inputs as needed -->
                 </div>
                 <!-- Submit Button -->
                 <div class="mt-4 flex justify-center">
@@ -198,6 +401,139 @@
         } else {
             usernameDisplay.textContent = 'Welcome, Guest!';
         }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            let approvalCount = 1;
+            let approvalCount2 = 1;
+            let approvalCount3 = 1;
+
+            document.getElementById('add-approval').addEventListener('click', () => {
+                approvalCount++;
+                const approvalContainer = document.getElementById('approval-container-1');
+
+                const newApprovalDiv = document.createElement('div');
+                newApprovalDiv.classList.add('w-full', 'flex', 'flex-wrap', 'px-2', 'mb-4');
+                newApprovalDiv.innerHTML = `
+                    <div class="w-full md:w-1/3 px-2 mb-4">
+                        <input
+                            class="shadow border rounded w-full py-2 px-3 text-gray-700"
+                            id="nama_approval_1_index_${approvalCount}"
+                            name="nama_approval_1"
+                            type="text"
+                            placeholder="Masukkan Nama"
+                            required
+                        />
+                    </div>
+                    <div class="w-full md:w-1/3 px-2 mb-4">
+                        <input
+                            class="shadow border rounded w-full py-2 px-3 text-gray-700"
+                            id="email_approval_index_${approvalCount}"
+                            name="email_approval_1"
+                            type="email"
+                            placeholder="Masukkan Email"
+                            required
+                        />
+                    </div>
+                    <div class="w-full md:w-1/3 px-2 mb-4">
+                        <input
+                            class="shadow border rounded w-full py-2 px-3 text-gray-700"
+                            id="jabatan_approval_index_${approvalCount}"
+                            name="jabatan_approval_1"
+                            type="text"
+                            placeholder="Masukkan Jabatan"
+                            required
+                        />
+                    </div>
+                `;
+
+                approvalContainer.appendChild(newApprovalDiv);
+
+            });
+            document.getElementById('add-approval-2').addEventListener('click', () => {
+                approvalCount2++;
+                const approvalContainer2 = document.getElementById('approval-container-2');
+
+                const newApprovalDiv2 = document.createElement('div');
+                newApprovalDiv2.classList.add('w-full', 'flex', 'flex-wrap', 'px-2', 'mb-4');
+                newApprovalDiv2.innerHTML = `
+                    <div class="w-full md:w-1/3 px-2 mb-4">
+                        <input
+                            class="shadow border rounded w-full py-2 px-3 text-gray-700"
+                            id="nama_approval_2_index_${approvalCount2}"
+                            name="nama_approval_2"
+                            type="text"
+                            placeholder="Masukkan Nama"
+                            required
+                        />
+                    </div>
+                    <div class="w-full md:w-1/3 px-2 mb-4">
+                        <input
+                            class="shadow border rounded w-full py-2 px-3 text-gray-700"
+                            id="email_approval_2_index_${approvalCount2}"
+                            name="email_approval_2"
+                            type="email"
+                            placeholder="Masukkan Email"
+                            required
+                        />
+                    </div>
+                    <div class="w-full md:w-1/3 px-2 mb-4">
+                        <input
+                            class="shadow border rounded w-full py-2 px-3 text-gray-700"
+                            id="jabatan_approval_index_${approvalCount}"
+                            name="jabatan_approval_2"
+                            type="text"
+                            placeholder="Masukkan Jabatan"
+                            required
+                        />
+                    </div>
+                `;
+
+                approvalContainer2.appendChild(newApprovalDiv2);
+            });
+
+            document.getElementById('add-approval-3').addEventListener('click', () => {
+                approvalCount3++;
+                const approvalContainer3 = document.getElementById('approval-container-3');
+
+                const newApprovalDiv3 = document.createElement('div');
+                newApprovalDiv3.classList.add('w-full', 'flex', 'flex-wrap', 'px-2', 'mb-4');
+                newApprovalDiv3.innerHTML = `
+                    <div class="w-full md:w-1/3 px-2 mb-4">
+                        <input
+                            class="shadow border rounded w-full py-2 px-3 text-gray-700"
+                            id="nama_approval_3_index_${approvalCount3}"
+                            name="nama_approval_3"
+                            type="text"
+                            placeholder="Masukkan Nama"
+                            required
+                        />
+                    </div>
+                    <div class="w-full md:w-1/3 px-2 mb-4">
+                        <input
+                            class="shadow border rounded w-full py-2 px-3 text-gray-700"
+                            id="email_approval_3_index_${approvalCount3}"
+                            name="email_approval_3"
+                            type="email"
+                            placeholder="Masukkan Email"
+                            required
+                        />
+                    </div>
+                    <div class="w-full md:w-1/3 px-2 mb-4">
+                        <input
+                            class="shadow border rounded w-full py-2 px-3 text-gray-700"
+                            id="jabatan_approval_index_${approvalCount}"
+                            name="jabatan_approval_3"
+                            type="text"
+                            placeholder="Masukkan Jabatan"
+                            required
+                        />
+                    </div>
+                `;
+
+                approvalContainer3.appendChild(newApprovalDiv3);
+            });
+
+        });
 
         const fileInput = document.getElementById('file_dokumen'); 
         const uploadContent = document.getElementById('upload-content');
@@ -236,9 +572,34 @@
             const formData = new FormData();
             formData.append('nomor_dokumen', document.getElementById('nomor_dokumen').value);
             formData.append('tgl_pengajuan', document.getElementById('tgl_pengajuan').value);
+            formData.append('tgl_deadline', document.getElementById('tgl_deadline').value);
             formData.append('judul_dokumen', document.getElementById('judul_dokumen').value);
             formData.append('file_dokumen', document.getElementById('file_dokumen').files[0]);
+            formData.append('nama_file_multer', file.filename); 
             formData.append('id_multer', file.lastModified);
+            formData.append('jenis_group_1', document.getElementById('jenis_group_1').value);
+            formData.append('jenis_group_2', document.getElementById('jenis_group_2').value);
+            formData.append('jenis_group_3', document.getElementById('jenis_group_3').value);
+
+            const urutanInputs = document.querySelectorAll('input[name^="urutan_approval_"]');
+            const urutanArray = Array.from(urutanInputs).map(input => parseInt(input.value));
+            formData.append('urutan', JSON.stringify(urutanArray));
+
+            const defaultInputs = document.querySelectorAll('input[name="nama_approval_1"], input[name="email_approval_1"], input[name="jabatan_approval_1"]');
+                defaultInputs.forEach((input) => {
+                    formData.append(input.name, input.value);
+                });
+            
+            const defaultInputs2 = document.querySelectorAll('input[name="nama_approval_2"], input[name="email_approval_2"], input[name="jabatan_approval_2"]');
+                defaultInputs2.forEach((input) => {
+                    formData.append(input.name, input.value);
+                });
+
+            const defaultInputs3 = document.querySelectorAll('input[name="nama_approval_3"], input[name="email_approval_3"], input[name="jabatan_approval_3"]');
+                defaultInputs3.forEach((input) => {
+                    formData.append(input.name, input.value);
+                });
+            
             const token = localStorage.getItem('accessToken');
 
             if (!token) {

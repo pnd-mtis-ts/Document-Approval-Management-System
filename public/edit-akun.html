@@ -42,7 +42,7 @@
 
       document.getElementById('name').value = user.name;
       document.getElementById('email').value = user.email;
-      document.getElementById('role').value = user.userAuth ? user.userAuth.role : 'User';
+      document.getElementById('role').value = user.userProfile ? user.userProfile.role : 'User';
       document.getElementById('jabatan').value = user.userProfile ? user.userProfile.jabatan : '';
     } catch (error) {
       console.error('Error fetching user data:', error);
