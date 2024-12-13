@@ -9,147 +9,160 @@ export class UsersService extends KnexService {
   }
 
   async create(data, params) {
-    const { alamat, nomor_telepon, role, company, jabatan, aplikasi, ...userData } = data
-
-    // Check if user already exists
-    const existingUser = await this.find({
-      query: { email: userData.email }
-    })
-
-    if (existingUser.total > 0) {
-      throw new BadRequest('User with this email already exists.')
-    }
-
-    // Generate unique username
-    const baseName = userData.name
-    let nameWithSuffix = baseName
-    let count = 1
-
-    while ((await this.find({ query: { name: nameWithSuffix } }).total) > 0) {
-      nameWithSuffix = `${baseName}${count}`
-      count++
-    }
-
-    userData.name = nameWithSuffix
+    const { alamat, nomor_telepon, authDataArray, password, ...userData } = data
 
     const trx = await this.knex.transaction()
 
     try {
-      // Hash password
-      const hashedPassword = await bcrypt.hash(data.password, 10)
-
-      // Insert ke tabel 'users' (tanpa alamat dan nomor_telepon)
-      const [newUserId] = await trx('users').insert({
-        name: data.name,
-        email: data.email,
-        password: hashedPassword
+      // Check existing user
+      const existingUser = await this.find({
+        query: { email: userData.email },
+        paginate: false
       })
 
-      // Insert ke tabel 'usersprofile'
+      if (existingUser.length > 0) {
+        throw new BadRequest('User dengan email ini sudah terdaftar.')
+      }
+
+      // Create new user
+      const [newUserId] = await trx('users').insert({
+        name: userData.name,
+        email: userData.email,
+        password: await bcrypt.hash(password, 10),
+        pin: data.pin
+      })
+
+      // Create user profile
       await trx('usersprofile').insert({
         user_id: newUserId,
-        alamat: data.alamat,
-        nomor_telepon: data.nomor_telepon
+        alamat,
+        nomor_telepon
       })
 
-      // Handle role
-      let roleId
-      const existingRole = await trx('usersrole').where({ name: data.role }).first()
-      if (existingRole) {
-        roleId = existingRole.id
-      } else {
-        const [insertedId] = await trx('usersrole').insert({ name: data.role })
-        roleId = insertedId
+      // Handle auth data
+      if (Array.isArray(authDataArray)) {
+        for (const authData of authDataArray) {
+          const { role, company, jabatan, aplikasi } = authData
+
+          // Handle role
+          let roleId
+          const existingRole = await trx('usersrole').where({ name: role }).first()
+          if (existingRole) {
+            roleId = existingRole.id
+          } else {
+            throw new BadRequest(`Role ${role} tidak ditemukan.`)
+          }
+
+          // Handle company
+          let companyId
+          const existingCompany = await trx('company').where({ id: company }).first()
+          if (existingCompany) {
+            companyId = existingCompany.id
+          } else {
+            throw new BadRequest(`Company dengan ID ${company} tidak ditemukan.`)
+          }
+
+          // Handle jabatan
+          let jabatanId
+          const existingJabatan = await trx('jabatan').where({ id: jabatan }).first()
+          if (existingJabatan) {
+            jabatanId = existingJabatan.id
+          } else {
+            throw new BadRequest(`Jabatan dengan ID ${jabatan} tidak ditemukan.`)
+          }
+
+          // Handle aplikasi
+          let aplikasiId
+          const existingAplikasi = await trx('aplikasi').where({ id: aplikasi }).first()
+          if (existingAplikasi) {
+            aplikasiId = existingAplikasi.id
+          } else {
+            throw new BadRequest(`Aplikasi dengan ID ${aplikasi} tidak ditemukan.`)
+          }
+
+          // Insert into usersauth
+          await trx('usersauth').insert({
+            user_id: newUserId,
+            role_id: roleId,
+            company_id: companyId,
+            jabatan_id: jabatanId,
+            aplikasi_id: aplikasiId
+          })
+        }
       }
 
-      // Handle company
-      let companyId
-      const existingCompany = await trx('company').where({ name: data.company }).first()
-      if (existingCompany) {
-        companyId = existingCompany.id
-      } else {
-        const [insertedId] = await trx('company').insert({ name: data.company })
-        companyId = insertedId
-      }
-
-      // Handle jabatan
-      let jabatanId
-      const existingJabatan = await trx('jabatan').where({ nama_jabatan: data.jabatan }).first()
-      if (existingJabatan) {
-        jabatanId = existingJabatan.id
-      } else {
-        const [insertedId] = await trx('jabatan').insert({ nama_jabatan: data.jabatan })
-        jabatanId = insertedId
-      }
-
-      // Handle aplikasi
-      let aplikasiId
-      const existingAplikasi = await trx('aplikasi').where({ name: data.aplikasi }).first()
-      if (existingAplikasi) {
-        aplikasiId = existingAplikasi.id
-      } else {
-        const [insertedId] = await trx('aplikasi').insert({ name: data.aplikasi })
-        aplikasiId = insertedId
-      }
-
-      // Insert ke tabel 'usersauth' dengan company_id, jabatan_id, aplikasi_id
-      await trx('usersauth').insert({
-        user_id: newUserId,
-        role_id: roleId,
-        company_id: companyId,
-        jabatan_id: jabatanId,
-        aplikasi_id: aplikasiId
-      })
-
-      // After all inserts are complete, create the response object with IDs
-      const responseData = {
-        id: newUserId,
-        name: data.name,
-        email: data.email,
-        password: data.password,
-        role: data.role,
-        alamat: data.alamat,
-        nomor_telepon: data.nomor_telepon,
-        company: data.company,
-        aplikasi: data.aplikasi,
-        jabatan: data.jabatan,
-        company_id: companyId, // Add the IDs to response
-        jabatan_id: jabatanId,
-        aplikasi_id: aplikasiId
-      }
-
-      // Commit transaksi
       await trx.commit()
 
-      // Kembalikan data pengguna baru
-      return responseData // Return the complete object
+      return {
+        id: newUserId,
+        name: userData.name,
+        email: userData.email,
+        alamat,
+        nomor_telepon
+      }
     } catch (error) {
-      // Rollback transaksi jika ada error
+      console.error('Error creating user:', error)
       await trx.rollback()
       throw error
     }
   }
 
+  // Add new method for authorization setup
+  async setupAuthorization(userId, authData) {
+    const { role, company, jabatan, aplikasi } = authData
+    const trx = await this.knex.transaction()
+
+    try {
+      // Handle role, company, jabatan, aplikasi creation/lookup
+      // ... (keep existing auth logic)
+
+      await trx.commit()
+      return this.get(userId)
+    } catch (error) {
+      await trx.rollback()
+      throw error
+    }
+  }
+
+  // users.class.js - Updated find method
+
   async find(params) {
     const users = await super.find(params)
 
-    for (let user of users.data) {
-      // Get userProfile with role and jabatan
-      user.userProfile = await this.knex('usersprofile')
-        .select('usersprofile.*', 'usersrole.name as role', 'jabatan.nama_jabatan as jabatan')
-        .where({ 'usersprofile.user_id': user.id })
-        .leftJoin('usersauth', 'usersprofile.user_id', 'usersauth.user_id')
-        .leftJoin('usersrole', 'usersauth.role_id', 'usersrole.id')
-        .leftJoin('jabatan', 'usersauth.jabatan_id', 'jabatan.id')
-        .first()
+    // Handle both paginated and non-paginated responses
+    const items = users.data ? users.data : users
 
-      user.userAuth = await this.knex('usersauth')
-        .select('usersauth.*')
-        .where({ 'usersauth.user_id': user.id })
-        .first()
+    // Process each user
+    const processedUsers = await Promise.all(
+      items.map(async (user) => {
+        // Get userProfile with role and jabatan
+        user.userProfile = await this.knex('usersprofile')
+          .select('usersprofile.*', 'usersrole.name as role', 'jabatan.nama_jabatan as jabatan')
+          .where({ 'usersprofile.user_id': user.id })
+          .leftJoin('usersauth', 'usersprofile.user_id', 'usersauth.user_id')
+          .leftJoin('usersrole', 'usersauth.role_id', 'usersrole.id')
+          .leftJoin('jabatan', 'usersauth.jabatan_id', 'jabatan.id')
+          .first()
+
+        // Get userAuth
+        user.userAuth = await this.knex('usersauth')
+          .select('usersauth.*')
+          .where({ 'usersauth.user_id': user.id })
+          .first()
+
+        return user
+      })
+    )
+
+    // Return in the correct format
+    if (users.data) {
+      return {
+        ...users,
+        data: processedUsers
+      }
     }
 
-    return users
+    return processedUsers
   }
 
   async get(id, params) {
@@ -196,7 +209,7 @@ export class UsersService extends KnexService {
         if (existingRole) {
           roleId = existingRole.id
         } else {
-          ;[roleId] = await trx('usersrole').insert({ name: role })
+          throw new BadRequest(`Role ${role} tidak ditemukan.`)
         }
 
         const existingAuth = await trx('usersauth').where({ user_id: id }).first()
@@ -209,29 +222,29 @@ export class UsersService extends KnexService {
 
       // Handle company_id
       let companyId
-      const existingCompany = await trx('company').where({ name: company }).first()
+      const existingCompany = await trx('company').where({ id: company }).first()
       if (existingCompany) {
         companyId = existingCompany.id
       } else {
-        ;[companyId] = await trx('company').insert({ name: company })
+        throw new BadRequest(`Company dengan ID ${company} tidak ditemukan.`)
       }
 
       // Handle jabatan_id
       let jabatanId
-      const existingJabatan = await trx('jabatan').where({ nama_jabatan: jabatan }).first()
+      const existingJabatan = await trx('jabatan').where({ id: jabatan }).first()
       if (existingJabatan) {
         jabatanId = existingJabatan.id
       } else {
-        ;[jabatanId] = await trx('jabatan').insert({ nama_jabatan: jabatan })
+        throw new BadRequest(`Jabatan dengan ID ${jabatan} tidak ditemukan.`)
       }
 
       // Handle aplikasi_id
       let aplikasiId
-      const existingAplikasi = await trx('aplikasi').where({ name: aplikasi }).first()
+      const existingAplikasi = await trx('aplikasi').where({ id: aplikasi }).first()
       if (existingAplikasi) {
         aplikasiId = existingAplikasi.id
       } else {
-        ;[aplikasiId] = await trx('aplikasi').insert({ name: aplikasi })
+        throw new BadRequest(`Aplikasi dengan ID ${aplikasi} tidak ditemukan.`)
       }
 
       // Update user auth entry

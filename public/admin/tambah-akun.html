@@ -10,6 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;800&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body class="bg-[#FFFFFF]">
@@ -53,7 +54,7 @@
         <hr class="my-4 text-gray-600">
         <div class="p-2.5 mt-3 flex items-center rounded-md px-4 duration-300 cursor-pointer hover:bg-[#00716A] group">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="size-6 fill-black group-hover:fill-white">
-                <path fill-rule="evenodd" d="M16.5 3.75a1.5 1.5 0 0 1 1.5 1.5v13.5a1.5 1.5 0 0 1-1.5 1.5h-6a1.5 1.5 0 0 1-1.5-1.5V15a.75.75 0 0 0-1.5 0v3.75a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V5.25a3 3 0 0 0-3-3h-6a3 3 0 0 0-3 3V9A.75.75 0 1 0 9 9V5.25a1.5 1.5 0 0 1 1.5-1.5h6ZM5.78 8.47a.75.75 0 0 0-1.06 0l-3 3a.75.75 0 0 0 0 1.06l3 3a.75.75 0 0 0 1.06-1.06l-1.72-1.72H15a.75.75 0 0 0 0-1.5H4.06l1.72-1.72a.75.75 0 0 0 0-1.06Z" clip-rule="evenodd" />
+                  <path fill-rule="evenodd" d="M16.5 3.75a1.5 1.5 0 0 1 1.5 1.5v13.5a1.5 1.5 0 0 1-1.5 1.5h-6a1.5 1.5 0 0 1-1.5-1.5V15a.75.75 0 0 0-1.5 0v3.75a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V5.25a3 3 0 0 0-3-3h-6ZM5.78 8.47a.75.75 0 0 0-1.06 0l-3 3a.75.75 0 0 0 0 1.06l3 3a.75.75 0 0 0 1.06-1.06l-1.72-1.72H15a.75.75 0 0 0 0-1.5H4.06l1.72-1.72a.75.75 0 0 0 0-1.06Z" clip-rule="evenodd" />
               </svg>              
           <span class="text-lg font-bold ml-4 text-[#00716A] group-hover:text-white">Logout</span>
         </div>
@@ -77,7 +78,7 @@
         </div>
         
         <div class="form">
-            <form class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <form id="formTambahAkun" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="mb-4">
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="nama">
                         Nama
@@ -124,23 +125,6 @@
                     <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-gray-600 focus:shadow-outline" id="pin" type="password">
                 </div>
 
-                <!-- Jabatan Select -->
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="jabatan">
-                        Jabatan
-                    </label>
-                    <div class="relative">
-                        <select class="shadow appearance-none border rounded w-full py-2 px-3 pr-8 text-gray-700 leading-tight focus:outline-gray-600 focus:shadow-outline" id="jabatan">
-                            <option value="">Pilih Jabatan</option>
-                        </select>
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                            <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-
                 <div class="mb-4">
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="signature">
                         Upload Tanda Tangan
@@ -159,48 +143,74 @@
                         disabled>
                     </div>
                 </div>
+            </form>
 
-                <!-- Company Select -->
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="company">
-                        Company
-                    </label>
-                    <div class="relative">
-                        <select class="shadow appearance-none border rounded w-full py-2 px-3 pr-8 text-gray-700 leading-tight focus:outline-gray-600 focus:shadow-outline" id="company">
+            <hr class="mt-4">
+            
+    <div id="userAuthorizationContainer" class="bg-white rounded-lg shadow-xl p-6 mt-6">
+      <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-bold text-[#00716A]">User Authorization</h2>
+          <button id="addAuthRow" class="bg-[#00716A] text-white p-2 rounded-full hover:bg-[#005c56] transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+          </button>
+      </div>
+    
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200" id="authTable">
+            <thead>
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jabatan</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aplikasi</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                </tr>
+            </thead>
+            <tbody id="authTableBody" class="bg-white divide-y divide-gray-200">
+                <tr class="auth-row">
+                    <td class="px-6 py-4">
+                        <select class="w-full rounded-lg border-gray-300 focus:border-[#00716A] focus:ring-[#00716A]" name="company">
                             <option value="">Pilih Company</option>
                         </select>
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                            <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Aplikasi Select -->
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="aplikasi">
-                        Aplikasi
-                    </label>
-                    <div class="relative">
-                        <select class="shadow appearance-none border rounded w-full py-2 px-3 pr-8 text-gray-700 leading-tight focus:outline-gray-600 focus:shadow-outline" id="aplikasi">
+                    </td>
+                    <td class="px-6 py-4">
+                        <select id="jabatanSelect" class="w-full rounded-lg border-gray-300 focus:border-[#00716A] focus:ring-[#00716A]" name="jabatan">
+                            <option value="">Pilih Jabatan</option>
+                        </select>
+                    </td>
+                    <td class="px-6 py-4">
+                        <select class="w-full rounded-lg border-gray-300 focus:border-[#00716A] focus:ring-[#00716A]"  name="aplikasi">
                             <option value="">Pilih Aplikasi</option>
                         </select>
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                            <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mt-4 flex justify-center col-span-1 md:col-span-2">
-                    <button type="button" class="bg-[#038F87] hover:bg-[#1f7c77] text-white font-bold py-2 px-20 rounded-xl" onclick="handleSubmit()">
-                        Tambah Akun
-                    </button>
-                </div>
-            </form>
-        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <select class="w-full rounded-lg border-gray-300 focus:border-[#00716A] focus:ring-[#00716A]" name="role">
+                            <option value="">Pilih Role</option>
+                            <option value="admin">Admin</option>
+                            <option value="user">User</option>
+                        </select>
+                    </td>
+                    <td class="px-6 py-4">
+                        <button class="text-red-600 hover:text-red-800 delete-row">
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                          </svg>                          
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="mt-4 flex justify-center">
+      <div class="mt-4 flex justify-center col-span-1 md:col-span-2">
+        <button type="button" class="bg-[#038F87] hover:bg-[#1f7c77] text-white font-bold py-2 px-20 rounded-xl" onclick="handleSubmit()">
+            Tambah Akun
+        </button>
+    </div>
+    </div>    
+  </div>
     </div>
   </div>
 
@@ -219,92 +229,198 @@
     }
 
     async function populateCompanies() {
-          try {
-            const response = await app.service('company').find();
-            console.log('Response:', response);
-            const companies = response.data || response; 
-        
-            const companySelect = document.getElementById('company');
-        
-            companySelect.innerHTML = '<option value="">Pilih Company</option>';
-        
-            companies.forEach(company => {
-              const option = document.createElement('option');
-              option.value = company.id;
-              option.textContent = company.name;
-              companySelect.appendChild(option);
-            });
-          } catch (error) {
-            console.error('Error fetching companies:', error);
-          }
+  try {
+    // Get select elements first
+    const companySelects = document.querySelectorAll('select[name="company"]');
+    const jabatanSelects = document.querySelectorAll('select[name="jabatan"]');
+    const aplikasiSelects = document.querySelectorAll('select[name="aplikasi"]');
+
+    // Verify elements exist
+    if (!companySelects.length || !jabatanSelects.length || !aplikasiSelects.length) {
+      console.warn('Select elements not found');
+      return;
+    }
+
+    // Fetch data
+    const [companies, jabatan, aplikasi] = await Promise.all([
+      app.service('company').find(),
+      app.service('jabatan').find(),
+      app.service('aplikasi').find()
+    ]);
+
+    // Function to safely populate select elements
+    const populateSelect = (selects, responseData, defaultText = "Select Option") => {
+      if (!selects || !responseData) return;
+      
+      const items = Array.isArray(responseData) ? responseData : 
+                   responseData.data ? responseData.data : [];
+
+      selects.forEach(select => {
+        if (select) {
+          select.innerHTML = `<option value="">${defaultText}</option>`;
+          items.forEach(item => {
+            const option = document.createElement('option');
+            option.value = item.id;
+            // Handle different property names
+            option.textContent = item.name || item.nama_jabatan || '';
+            select.appendChild(option);
+          });
         }
-        
-        document.addEventListener('DOMContentLoaded', populateCompanies);
+      });
+    };
+
+    // Populate dropdowns
+    populateSelect(companySelects, companies, "Select Company");
+    populateSelect(jabatanSelects, jabatan, "Select Jabatan");
+    populateSelect(aplikasiSelects, aplikasi, "Select Aplikasi");
+
+  } catch (error) {
+    console.error('Error populating select elements:', error);
+    Swal.fire('Error', 'Gagal memuat data perusahaan, jabatan, dan aplikasi', 'error');
+  }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', populateCompanies);
+
+    // Function to handle adding new authorization row
+function addNewAuthRow() {
+  const authTableBody = document.querySelector('#authTableBody');
+  const newRow = document.createElement('tr');
+  newRow.className = 'auth-row';
+  newRow.innerHTML = `
+    <td class="px-6 py-4">
+      <select class="w-full rounded-lg border-gray-300 focus:border-[#00716A] focus:ring-[#00716A]" name="company">
+        <option value="">Select Company</option>
+      </select>
+    </td>
+    <td class="px-6 py-4">
+      <select id="jabatanSelect" class="w-full rounded-lg border-gray-300 focus:border-[#00716A] focus:ring-[#00716A]" name="jabatan">
+        <option value="">Select Jabatan</option>
+      </select>
+    </td>
+    <td class="px-6 py-4">
+      <select class="w-full rounded-lg border-gray-300 focus:border-[#00716A] focus:ring-[#00716A]" name="aplikasi">
+        <option value="">Select Aplikasi</option>
+      </select>
+    </td>
+    <td class="px-6 py-4">
+      <select class="w-full rounded-lg border-gray-300 focus:border-[#00716A] focus:ring-[#00716A]" name="role">
+        <option value="">Select Role</option>
+        <option value="admin">Admin</option>
+        <option value="user">User</option>
+      </select>
+    </td>
+    <td class="px-6 py-4">
+      <button class="text-red-600 hover:text-red-800 delete-row">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c." />
+        </svg>
+      </button>
+    </td>
+  `;
+  authTableBody.appendChild(newRow);
+  populateCompanies(); // Populate the new row's select elements
+}
 
     async function handleSubmit() {
-        try {
-            const formData = {
-                name: document.getElementById('nama').value,
-                email: document.getElementById('email').value,
-                password: document.getElementById('password').value,
-                role: "User",
-                alamat: document.getElementById('alamat').value,
-                nomor_telepon: document.getElementById('telepon').value,
-                pin: document.getElementById('pin').value,
-                // Add new fields from dropdowns
-                company: document.getElementById('company').options[document.getElementById('company').selectedIndex].textContent,
-                jabatan: document.getElementById('jabatan').options[document.getElementById('jabatan').selectedIndex].textContent,
-                aplikasi: document.getElementById('aplikasi').options[document.getElementById('aplikasi').selectedIndex].textContent
-            };
+  try {
+    // User data validation
+    const userData = {
+      name: document.getElementById('nama').value.trim(),
+      email: document.getElementById('email').value.trim(),
+      password: document.getElementById('password').value,
+      pin: document.getElementById('pin').value || undefined,
+      alamat: document.getElementById('alamat').value.trim() || undefined,
+      nomor_telepon: document.getElementById('telepon').value.trim() || undefined,
+      authDataArray: []
+    };
 
-            // Validate required fields
-            if (!formData.company || !formData.jabatan || !formData.aplikasi) {
-                throw new Error('Silakan pilih Company, Jabatan, dan Aplikasi');
-            }
+    // Ambil data authorization
+    const authRows = document.querySelectorAll('.auth-row');
 
-            const result = await app.service('users').create(formData);
-            
-            if (result) {
-                await Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil!',
-                    text: 'Akun berhasil ditambahkan',
-                });
-                window.location.href = 'tambah-akun.html';
-            }
-        } catch (error) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: error.message
-            });
-            console.error('Error:', error);
-        }
-    }
+    authRows.forEach(row => {
+      // Get select elements
+      const companySelect = row.querySelector('select[name="company"]');
+      const jabatanSelect = row.querySelector('select[name="jabatan"]');
+      const aplikasiSelect = row.querySelector('select[name="aplikasi"]');
+      const roleSelect = row.querySelector('select[name="role"]');
 
-    // Function for Jabatan
-    async function populateJabatan() {
-      try {
-        const response = await app.service('jabatan').find();
-        console.log('Response Jabatan:', response);
-        const jabatanList = response.data || response;
+      // Pastikan value dari select adalah ID yang sudah ada
+      const authData = {
+        company: companySelect.value, // Keep as ID
+        jabatan: jabatanSelect.value, // Keep as ID
+        aplikasi: aplikasiSelect.value, // Keep as ID
+        role: roleSelect.value
+      };
 
-        const jabatanSelect = document.getElementById('jabatan');
-        
-        jabatanSelect.innerHTML = '<option value="">Pilih Jabatan</option>';
-
-        jabatanList.forEach(jabatan => {
-          const option = document.createElement('option');
-          option.value = jabatan.id;
-          option.textContent = jabatan.nama_jabatan;
-          jabatanSelect.appendChild(option);
+      // Validasi data authorization
+      if (authData.company && authData.jabatan && authData.aplikasi && authData.role) {
+        userData.authDataArray.push(authData);
+        Swal.fire({
+          title: 'Sukses!',
+          text: 'Data user berhasil dibuat.',
+          icon: 'success',
+          confirmButtonText: 'OK'
         });
-      } catch (error) {
-        console.error('Error fetching jabatan:', error);
-      }
+        } else {
+        console.warn('Data otorisasi tidak lengkap pada salah satu baris.');
+        }
+        });
+
+    // Kirim data ke server
+    const response = await fetch('/users', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(userData)
+    });
+
+    const result = await response.json();
+
+  } catch (error) {
+    console.error('Error:', error);
+    Swal.fire('Error', error.message || 'Terjadi kesalahan saat menyimpan data', 'error');
+  }
+}
+
+    async function populateJabatan(selectElement) {
+  try {
+    if (!selectElement) {
+      console.error('Jabatan select element not found');
+      return;
     }
 
-    // Function for Aplikasi
+    const response = await app.service('jabatan').find();
+    const jabatanData = response.data || response;
+
+    // Clear existing options
+    selectElement.innerHTML = '<option value="">Pilih Jabatan</option>';
+
+    // Add new options
+    jabatanData.forEach(item => {
+      const option = document.createElement('option');
+      option.value = item.id;
+      option.textContent = item.nama_jabatan;
+      selectElement.appendChild(option);
+    });
+
+  } catch (error) {
+    console.error('Error populating jabatan:', error);
+  }
+}
+
+// Call the function with proper error handling
+document.addEventListener('DOMContentLoaded', () => {
+  const jabatanSelects = document.querySelectorAll('select[name="jabatan"]');
+  jabatanSelects.forEach(select => {
+    if (select) {
+      populateJabatan(select);
+    }
+  });
+});
+
     async function populateAplikasi() {
       try {
         const response = await app.service('aplikasi').find();
@@ -323,15 +439,253 @@
         });
       } catch (error) {
         console.error('Error fetching aplikasi:', error);
+        throw new Error(error.message);
       }
     }
 
-    // Call all populate functions when page loads
     document.addEventListener('DOMContentLoaded', () => {
       populateCompanies();
       populateJabatan();
       populateAplikasi();
     });
+
+
+    document.addEventListener('DOMContentLoaded', function() {
+    const addAuthRow = document.getElementById('addAuthRow');
+    const authTableBody = document.getElementById('authTableBody');
+    
+    addAuthRow.addEventListener('click', function() {
+        const newRow = authTableBody.querySelector('.auth-row').cloneNode(true);
+        newRow.querySelectorAll('select').forEach(select => select.selectedIndex = 0);
+        addDeleteHandler(newRow.querySelector('.delete-row'));
+        authTableBody.appendChild(newRow);
+    });
+
+    document.querySelectorAll('.delete-row').forEach(addDeleteHandler);
+
+    function addDeleteHandler(button) {
+        button.addEventListener('click', function() {
+            if (authTableBody.querySelectorAll('.auth-row').length > 1) {
+                button.closest('.auth-row').remove();
+            }
+        });
+    }
+});
+
+  async function handleAuthorizationSubmit() {
+  try {
+    const userId = window.newUserId;
+    if (!userId) {
+      Swal.fire('Error', 'User ID tidak ditemukan', 'error');
+      return;
+    }
+
+    const authRows = document.querySelectorAll('.auth-row');
+    const authorizations = Array.from(authRows).map(row => ({
+      company: row.querySelector('select[name="company"]').value,
+      jabatan: row.querySelector('select[name="jabatan"]').value,
+      aplikasi: row.querySelector('select[name="aplikasi"]').value,
+      role: row.querySelector('select[name="role"]').value
+    }));
+
+    if (authorizations.some(auth => !auth.company || !auth.jabatan || !auth.aplikasi || !auth.role)) {
+      Swal.fire('Error', 'Semua field harus diisi', 'error');
+      return;
+    }
+
+    const app = feathers();
+    const restClient = feathers.rest('http://localhost:3030');
+    app.configure(restClient.axios(axios));
+
+    const response = await app.service('users').create({
+      user_id: userId,
+      authorizations: authorizations
+    });
+
+    if (response.message) {
+      Swal.fire('Success', response.message, 'success');
+    }
+
+  } catch (error) {
+    console.error('Error submitting authorizations:', error);
+    Swal.fire('Error', error.message, 'error');
+  }
+}
+
+function updateSelectOptions(selectElements, options) {
+  selectElements.forEach(select => {
+    select.innerHTML = '<option value="">Select Option</option>';
+    options.forEach(option => {
+      const opt = document.createElement('option');
+      opt.value = option.id;
+      opt.textContent = option.name;
+      select.appendChild(opt);
+    });
+  });
+}
+
+document.getElementById('formTambahAkun').addEventListener('submit', async function(e) {
+  e.preventDefault();
+
+  // Ambil data pengguna
+const userData = {
+  name: document.getElementById('nama').value.trim(),
+  email: document.getElementById('email').value.trim(),
+  password: document.getElementById('password').value,
+  pin: document.getElementById('pin').value.trim(),
+  alamat: document.getElementById('alamat').value.trim(),
+  nomor_telepon: document.getElementById('telepon').value.trim()
+};
+
+// Ambil data authorization
+const authRows = document.querySelectorAll('.auth-row');
+const authDataArray = [];
+
+authRows.forEach(row => {
+  const authData = {
+    company: row.querySelector('select[name="company"]').value,
+    jabatan: row.querySelector('select[name="jabatan"]').value,
+    aplikasi: row.querySelector('select[name="aplikasi"]').value,
+    role: row.querySelector('select[name="role"]').value
+  };
+
+  // Validasi data authorization
+  if (authData.company && authData.jabatan && authData.aplikasi && authData.role) {
+    authDataArray.push(authData);
+  }
+});
+
+// Setelah mengumpulkan authDataArray
+console.log('authDataArray:', authDataArray);
+
+// Pastikan requestData juga mencakup authDataArray
+const requestData = {
+  ...userData,
+  authDataArray
+};
+console.log('requestData:', requestData);
+
+  console.log('Full request data:', requestData);
+
+  try {
+    const response = await fetch('/users', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestData)
+    });
+
+    const result = await response.json();
+    console.log('Server response:', result);
+
+    if (response.ok) {
+      alert('User created successfully!');
+      window.location.href = '/users';
+    } else {
+      throw new Error(result.message || 'Failed to create user');
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    alert(error.message);
+  }
+});
+
+// JavaScript code to populate 'jabatan' select elements
+
+async function populateJabatan() {
+  try {
+    const response = await app.service('jabatan').find();
+    const jabatanData = response.data || response;
+
+    // Select all jabatan select elements
+    const jabatanSelects = document.querySelectorAll('select[name="jabatan"]');
+    
+    if (jabatanSelects.length === 0) {
+      // Elements not found at this time; exit the function
+      console.warn('No jabatan select elements found at this moment.');
+      return;
+    }
+
+    jabatanSelects.forEach(selectElement => {
+      selectElement.innerHTML = '<option value="">Pilih Jabatan</option>';
+
+      jabatanData.forEach(item => {
+        const option = document.createElement('option');
+        option.value = item.id;
+        option.textContent = item.nama_jabatan;
+        selectElement.appendChild(option);
+      });
+    });
+
+  } catch (error) {
+    console.error('Error populating jabatan:', error);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  populateJabatan();
+});
+
+function addNewRow() {
+  populateJabatan();
+}
+
+async function populateCompany() {
+  try {
+    const response = await app.service('company').find();
+    const companyData = response.data || response;
+
+    const companySelects = document.querySelectorAll('select[name="company"]');
+
+    if (companySelects.length === 0) {
+      console.warn('Tidak ada elemen select company yang ditemukan saat ini.');
+      return;
+    }
+
+    companySelects.forEach(selectElement => {
+      selectElement.innerHTML = '<option value="">Pilih Company</option>';
+
+      companyData.forEach(item => {
+        const option = document.createElement('option');
+        option.value = item.id;
+        option.textContent = item.name; 
+        selectElement.appendChild(option);
+      });
+    });
+
+  } catch (error) {
+    console.error('Error populating company:', error);
+  }
+}
+
+async function populateAplikasi() {
+  try {
+    const response = await app.service('aplikasi').find();
+    const aplikasiData = response.data || response;
+
+    const aplikasiSelects = document.querySelectorAll('select[name="aplikasi"]');
+
+    if (aplikasiSelects.length === 0) {
+      console.warn('Tidak ada elemen select aplikasi yang ditemukan saat ini.');
+      return;
+    }
+
+    aplikasiSelects.forEach(selectElement => {
+      selectElement.innerHTML = '<option value="">Pilih Aplikasi</option>';
+
+      aplikasiData.forEach(item => {
+        const option = document.createElement('option');
+        option.value = item.id;
+        option.textContent = item.name;
+        selectElement.appendChild(option);
+      });
+    });
+
+  } catch (error) {
+    console.error('Error populating aplikasi:', error);
+  }
+}
   </script>
 </body>
 

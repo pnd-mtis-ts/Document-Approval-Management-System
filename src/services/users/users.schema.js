@@ -35,9 +35,27 @@ export const usersDataSchema = {
   $id: 'UsersData',
   type: 'object',
   additionalProperties: false,
-  required: ['name', 'email'],
+  required: ['name', 'email', 'password'],
   properties: {
-    ...usersSchema.properties
+    name: { type: 'string' },
+    email: { type: 'string' },
+    password: { type: 'string' },
+    alamat: { type: 'string' },
+    nomor_telepon: { type: 'string' },
+    pin: { type: 'string' },
+    authDataArray: {
+      type: 'array',
+      items: {
+        type: 'object',
+        required: ['role', 'company', 'jabatan', 'aplikasi'],
+        properties: {
+          role: { type: 'string' },
+          company: { type: 'string' }, // Expect string
+          jabatan: { type: 'string' }, // Expect string
+          aplikasi: { type: 'string' } // Expect string
+        }
+      }
+    }
   }
 }
 export const usersDataValidator = getValidator(usersDataSchema, dataValidator)
