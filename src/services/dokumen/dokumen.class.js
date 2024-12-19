@@ -34,7 +34,7 @@ export class DokumenService extends KnexService {
             tgl_pengajuan: data.tgl_pengajuan || new Date(),
           });
   
-          dokumenId = insertedDokumen;
+          dokumenId = insertedDokumen[0];
           console.log(`Created new dokumen_id: ${dokumenId}`);
         }
 
@@ -92,7 +92,7 @@ export class DokumenService extends KnexService {
         if (data.nama_file && data.tipe_file && data.size_file) {
           
           const maxVersionResult = await trx('dokumenversion')
-            .where('dokumen_id', dokumenId) // Cari berdasarkan id_multer
+            .where('dokumen_id', dokumenId) 
             .max('version as maxVersion')
             .first();
 
@@ -107,9 +107,7 @@ export class DokumenService extends KnexService {
           : `${baseName}_versi_${newVersion}${ext}`;
 
           const fileUrl = path.join('uploads', prefixedNamaFile);
-
-          if (newVersion > 1) {
-            const oldFilePath = path.join('uploads', data.nama_file_multer);
+          const oldFilePath = path.join('uploads', data.nama_file_multer);
             try {
               await fs.rename(oldFilePath, fileUrl);
               console.log(`Renamed file from ${oldFilePath} to ${fileUrl}`);
@@ -117,7 +115,7 @@ export class DokumenService extends KnexService {
               console.error('Error renaming file:', err);
               throw err;
             }
-          }
+          
 
           const mimeType = data.tipe_file;
           const tipeFile = mimeType.split('/')[1];
