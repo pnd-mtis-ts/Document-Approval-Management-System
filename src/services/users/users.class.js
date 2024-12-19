@@ -168,20 +168,30 @@ export class UsersService extends KnexService {
   async get(id, params) {
     const user = await super.get(id, params)
 
-    // Get userProfile with role and jabatan
-    user.userProfile = await this.knex('usersprofile')
-      .select('usersprofile.*', 'usersrole.name as role', 'jabatan.nama_jabatan as jabatan')
-      .where({ 'usersprofile.user_id': id })
-      .leftJoin('usersauth', 'usersprofile.user_id', 'usersauth.user_id')
-      .leftJoin('usersrole', 'usersauth.role_id', 'usersrole.id')
-      .leftJoin('jabatan', 'usersauth.jabatan_id', 'jabatan.id')
+    // Fetch user profile from usersprofile table
+    const userProfile = await this.knex('usersprofile')
+      .select('alamat', 'nomor_telepon')
+      .where({ user_id: id })
       .first()
 
-    // Get userAuth without role and jabatan
-    user.userAuth = await this.knex('usersauth')
-      .select('usersauth.*')
+    user.userProfile = userProfile
+
+    // Fetch user authorization data
+    const userAuths = await this.knex('usersauth')
+      .select(
+        'usersauth.*',
+        'usersrole.name as role',
+        'company.name as company',
+        'jabatan.nama_jabatan as jabatan',
+        'aplikasi.name as aplikasi'
+      )
       .where({ 'usersauth.user_id': id })
-      .first()
+      .leftJoin('usersrole', 'usersauth.role_id', 'usersrole.id')
+      .leftJoin('company', 'usersauth.company_id', 'company.id')
+      .leftJoin('jabatan', 'usersauth.jabatan_id', 'jabatan.id')
+      .leftJoin('aplikasi', 'usersauth.aplikasi_id', 'aplikasi.id')
+
+    user.userAuths = userAuths
 
     return user
   }
@@ -273,6 +283,28 @@ export class UsersService extends KnexService {
       return this.get(id, params)
     } catch (error) {
       // If anything goes wrong, roll back the transaction
+      await trx.rollback()
+      throw error
+    }
+  }
+
+  async remove(id, params) {
+    const trx = await this.knex.transaction()
+
+    try {
+      // Delete user auth
+      await trx('usersauth').where({ user_id: id }).del()
+
+      // Delete user profile
+      await trx('usersprofile').where({ user_id: id }).del()
+
+      // Delete user
+      await trx('users').where({ id }).del()
+
+      await trx.commit()
+
+      return { id }
+    } catch (error) {
       await trx.rollback()
       throw error
     }

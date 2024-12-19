@@ -1,29 +1,28 @@
 import { KnexService } from '@feathersjs/knex'
 import path from 'path'
-import fs from 'fs/promises';
+import fs from 'fs/promises'
 
 export class DokumenService extends KnexService {
   async create(data, params) {
-    const knex = this.Model;
+    const knex = this.Model
 
     try {
       const result = await knex.transaction(async (trx) => {
-      
-        console.log('Incoming data:', data);
+        console.log('Incoming data:', data)
         const generateIdMulter = () => {
-          return `${Date.now()}${Math.floor(Math.random() * 10)}`;
+          return `${Date.now()}${Math.floor(Math.random() * 10)}`
         }
 
-        let dokumenId;
-      const existingVersion = await trx('dokumen')
-        .select('id')
-        .where('nomor_dokumen', data.nomor_dokumen)
-        .first();
+        let dokumenId
+        const existingVersion = await trx('dokumen')
+          .select('id')
+          .where('nomor_dokumen', data.nomor_dokumen)
+          .first()
 
         if (existingVersion) {
           // Jika ada, gunakan dokumen_id yang sudah ada
-          dokumenId = existingVersion.id;
-          console.log(`Using existing dokumen_id: ${dokumenId}`);
+          dokumenId = existingVersion.id
+          console.log(`Using existing dokumen_id: ${dokumenId}`)
         } else {
           // Jika tidak ada, buat dokumen baru
           const insertedDokumen = await trx('dokumen').insert({
@@ -31,42 +30,48 @@ export class DokumenService extends KnexService {
             judul_dokumen: data.judul_dokumen,
             user_id: data.user_id,
             status: data.status,
-            tgl_pengajuan: data.tgl_pengajuan || new Date(),
-          });
-  
-          dokumenId = insertedDokumen;
-          console.log(`Created new dokumen_id: ${dokumenId}`);
+            tgl_pengajuan: data.tgl_pengajuan || new Date()
+          })
+
+          dokumenId = insertedDokumen
+          console.log(`Created new dokumen_id: ${dokumenId}`)
         }
 
         const approvals = [
-          { urutan: 1, 
-            nama: data.nama_approval_1, 
-            email: data.email_approval_1, 
+          {
+            urutan: 1,
+            nama: data.nama_approval_1,
+            email: data.email_approval_1,
             jabatan: data.jabatan_approval_1,
-            jenis_group: data.jenis_group_1 },
-          { urutan: 2, 
-            nama: data.nama_approval_2, 
-            email: data.email_approval_2, 
+            jenis_group: data.jenis_group_1
+          },
+          {
+            urutan: 2,
+            nama: data.nama_approval_2,
+            email: data.email_approval_2,
             jabatan: data.jabatan_approval_2,
-            jenis_group: data.jenis_group_2 },
-          { urutan: 3, 
-            nama: data.nama_approval_3, 
-            email: data.email_approval_3, 
+            jenis_group: data.jenis_group_2
+          },
+          {
+            urutan: 3,
+            nama: data.nama_approval_3,
+            email: data.email_approval_3,
             jabatan: data.jabatan_approval_3,
-            jenis_group: data.jenis_group_3 },
-        ];
+            jenis_group: data.jenis_group_3
+          }
+        ]
 
-        const normalizedApprovals = approvals.map(approval => ({
+        const normalizedApprovals = approvals.map((approval) => ({
           urutan: approval.urutan,
           nama: Array.isArray(approval.nama) ? approval.nama : [approval.nama],
           email: Array.isArray(approval.email) ? approval.email : [approval.email],
           jabatan: Array.isArray(approval.jabatan) ? approval.jabatan : [approval.jabatan],
-          jenis_group: approval.jenis_group,
-        }));
-        
+          jenis_group: approval.jenis_group
+        }))
+
         for (const approval of normalizedApprovals) {
-          const { urutan, nama, email, jabatan, jenis_group } = approval;
-          const group_index = approvals.findIndex(a => a.urutan === urutan) + 1; 
+          const { urutan, nama, email, jabatan, jenis_group } = approval
+          const group_index = approvals.findIndex((a) => a.urutan === urutan) + 1
 
           for (let i = 0; i < nama.length; i++) {
             const [insertedDokumenApprovalId] = await trx('dokumenapproval').insert({
@@ -75,53 +80,59 @@ export class DokumenService extends KnexService {
               email: email[i],
               jabatan: jabatan[i],
               index: i + 1,
-              group_index: group_index, 
+              group_index: group_index,
               jenis_group: jenis_group,
               tgl_deadline: data.tgl_deadline || null,
-              approval_status: 'pending',
-            });
+              approval_status: 'pending'
+            })
             const dokumenApproval = await trx('dokumenapproval')
-            .where('id', insertedDokumenApprovalId)
-            .first();
-      
-            console.log(`DokumenApproval: `, dokumenApproval);
-            console.log(`Inserted approval: ${nama[i]}, Email: ${email[i]}, Index: ${i + 1}, Group Index: ${group_index}, Jenis Group: ${jenis_group}`);
+              .where('id', insertedDokumenApprovalId)
+              .first()
+
+            console.log(`DokumenApproval: `, dokumenApproval)
+            console.log(
+              `Inserted approval: ${nama[i]}, Email: ${email[i]}, Index: ${i + 1}, Group Index: ${group_index}, Jenis Group: ${jenis_group}`
+            )
           }
         }
 
         if (data.nama_file && data.tipe_file && data.size_file) {
-          
+          console.log('dokumenId:', dokumenId)
+
+          // Ensure dokumenId is a scalar value
+          const singleDokumenId = Array.isArray(dokumenId) ? dokumenId[0] : dokumenId
+          console.log('Using dokumenId:', singleDokumenId)
+
           const maxVersionResult = await trx('dokumenversion')
-            .where('dokumen_id', dokumenId) // Cari berdasarkan id_multer
+            .where('dokumen_id', singleDokumenId)
             .max('version as maxVersion')
-            .first();
+            .first()
 
-          const currentMaxVersion = maxVersionResult.maxVersion || 0;
-          const newVersion = currentMaxVersion + 1;
-          const idMulter = generateIdMulter();
+          const currentMaxVersion = maxVersionResult.maxVersion || 0
+          const newVersion = currentMaxVersion + 1
+          const idMulter = generateIdMulter()
 
-        const baseName = path.parse(data.nama_file).name;
-        const ext = path.extname(data.nama_file);
-        const prefixedNamaFile = idMulter
-          ? `${idMulter}-${baseName}_versi_${newVersion}${ext}`
-          : `${baseName}_versi_${newVersion}${ext}`;
+          const baseName = path.parse(data.nama_file).name
+          const ext = path.extname(data.nama_file)
+          const prefixedNamaFile = idMulter
+            ? `${idMulter}-${baseName}_versi_${newVersion}${ext}`
+            : `${baseName}_versi_${newVersion}${ext}`
 
-          const fileUrl = path.join('uploads', prefixedNamaFile);
+          const fileUrl = path.join('uploads', prefixedNamaFile)
 
           if (newVersion > 1) {
-            const oldFilePath = path.join('uploads', data.nama_file_multer);
+            const oldFilePath = path.join('uploads', data.nama_file_multer)
             try {
-              await fs.rename(oldFilePath, fileUrl);
-              console.log(`Renamed file from ${oldFilePath} to ${fileUrl}`);
+              await fs.rename(oldFilePath, fileUrl)
+              console.log(`Renamed file from ${oldFilePath} to ${fileUrl}`)
             } catch (err) {
-              console.error('Error renaming file:', err);
-              throw err;
+              console.error('Error renaming file:', err)
+              throw err
             }
           }
 
-          const mimeType = data.tipe_file;
-          const tipeFile = mimeType.split('/')[1];
-          
+          const mimeType = data.tipe_file
+          const tipeFile = mimeType.split('/')[1]
 
           await trx('dokumenversion').insert({
             nama_file: prefixedNamaFile,
@@ -133,11 +144,11 @@ export class DokumenService extends KnexService {
             tgl_upload: new Date(),
             deskripsi: data.deskripsi || null,
             version: newVersion,
-            id_multer: idMulter || null,
-          });
-          console.log('Inserted into dokumenversion for dokumen ID:', dokumenId);
+            id_multer: idMulter || null
+          })
+          console.log('Inserted into dokumenversion for dokumen ID:', dokumenId)
         } else {
-          console.log('No file data to insert into dokumenversion.');
+          console.log('No file data to insert into dokumenversion.')
         }
 
         const createdDokumen = await trx('dokumen')
@@ -155,31 +166,43 @@ export class DokumenService extends KnexService {
             'dokumenversion.tgl_upload',
             'dokumenversion.version',
             'dokumenversion.deskripsi',
-            'dokumenversion.file_url',
+            'dokumenversion.file_url'
           )
           .leftJoin('dokumenversion', 'dokumen.id', 'dokumenversion.dokumen_id')
-          .where('dokumen.id', dokumenId)
+          .whereIn('dokumen.id', dokumenId)
           .orderBy('dokumenversion.version', 'desc')
-          .first();
+          .first()
 
-        console.log('Created document with version data:', createdDokumen);
-        return createdDokumen;
-      });
+        console.log('Created document with version data:', createdDokumen)
+        return createdDokumen
+      })
 
-      return result;
+      return result
     } catch (error) {
-      console.error('Error in create:', error);
-      throw error;
+      console.error('Error in create:', error)
+      throw error
     }
   }
 
   async find(params) {
+    const knex = this.Model
+    try {
+      const documents = await knex('dokumen')
+        .select('dokumen.*', 'dokumenversion.file_url', 'dokumenversion.version', 'dokumenversion.nama_file')
+        .leftJoin('dokumenversion', 'dokumen.id', 'dokumenversion.dokumen_id')
+        .whereIn(
+          'dokumenversion.version',
+          knex.raw('(SELECT MAX(version) FROM dokumenversion WHERE dokumen_id = dokumen.id)')
+        )
 
-    return super.find(params)
+      return { data: documents }
+    } catch (error) {
+      console.error('Error in find:', error)
+      throw error
+    }
   }
 
   async get(id, params) {
-    
     const { user } = params
     const dokumen = await super.get(id, params)
 
@@ -187,7 +210,6 @@ export class DokumenService extends KnexService {
   }
 
   async patch(id, data, params) {
-    
     const { user } = params
     const dokumen = await this.get(id, params)
 

@@ -11,6 +11,7 @@ import { authentication } from './authentication.js'
 import { services } from './services/index.js'
 import { channels } from './channels.js'
 import multer from 'multer'
+import path from 'path'
 
 const app = koa(feathers())
 
@@ -36,7 +37,11 @@ const storage = multer.diskStorage({
     cb(null, 'uploads/')
   },
   filename: (req, file, cb) => {
-    cb(null, file.originalname)
+    const idMulter = `${Date.now()}${Math.floor(Math.random() * 10)}`
+    const baseName = path.parse(file.originalname).name
+    const ext = path.extname(file.originalname)
+    const prefixedNamaFile = `${idMulter}-${baseName}${ext}`
+    cb(null, prefixedNamaFile)
   }
 })
 

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Dokumen</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    </script>
+</head>
+<body>
+    <div class="container mx-auto p-8">
+        <h1 class="text-2xl font-bold mb-6">Daftar Dokumen</h1>
+        <div id="document-list" class="grid grid-cols-1 gap-4">
+            <!-- Documents will be inserted here -->
+        </div>
+    </div>
+
+    <!-- PDF Viewer Modal -->
+    <div id="pdf-viewer" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 hidden">
+        <div id="pdf-container" class="bg-white p-4 rounded-lg w-full max-w-4xl max-h-[80vh] overflow-y-auto relative">
+            <button onclick="closePDF()" class="absolute top-2 right-2 text-gray-700 hover:text-gray-900 text-2xl">&times;</button>
+            <!-- PDF pages will be added here -->
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/@feathersjs/client@^5.0.0/dist/feathers.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+        // Initialize Feathers client
+        const client = feathers();
+        const restClient = feathers.rest('http://localhost:3030');
+        client.configure(restClient.axios(axios));
+
+        async function fetchDocuments() {
+            try {
+                const token = localStorage.getItem('accessToken');
+                const response = await axios.get('http://localhost:3030/dokumen', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                // Debug: Log the entire response
+                console.log('Response:', response);
+
+                const documentList = document.getElementById('document-list');
+                documentList.innerHTML = '';
+
+                // Ensure response data is correctly accessed
+                const documents = response.data.data || response.data;
+
+                for (const doc of documents) {
+                    console.log('Document:', doc);
+                    
+                    const docElement = document.createElement('div');
+                    docElement.className = 'border p-4 rounded-lg shadow hover:shadow-lg transition-shadow cursor-pointer';
+                    docElement.innerHTML = `
+                        <h3 class="text-lg font-semibold">${doc.judul_dokumen}</h3>
+                        <p class="text-gray-600">Status: ${doc.status}</p>
+                        <p class="text-gray-600">File Name: ${doc.nama_file || 'No file'}</p>
+                        <p class="text-gray-600">File URL: ${doc.file_url || 'No file'}</p>
+                    `;
+                
+                    docElement.onclick = () => {
+                        if (doc.nama_file) {
+                            const filePath = `uploads/${doc.nama_file}`;
+                            console.log('Processed file path:', filePath);
+                            showPDF(filePath);
+                        } else {
+                            console.error('No file URL available for document:', doc.judul_dokumen);
+                        }
+                    };
+                    documentList.appendChild(docElement);
+                }
+            } catch (error) {
+                console.error('Error fetching documents:', error);
+            }
+        }
+
+        function showPDF(filePath) {
+            // Replace spaces with URL-encoded %20
+            const encodedFilePath = filePath.replace(/ /g, '%20');
+            const url = `http://localhost:3030/${encodedFilePath}`;
+            console.log('PDF URL:', url);
+            const pdfContainer = document.getElementById('pdf-container');
+            pdfContainer.innerHTML = '';
+
+            pdfjsLib.getDocument(url).promise.then(function(pdf) {
+                const numPages = pdf.numPages;
+                const renderPromises = [];
+
+                for (let pageNumber = 1; pageNumber <= numPages; pageNumber++) {
+                    renderPromises.push(
+                        pdf.getPage(pageNumber).then(function(page) {
+                            const viewport = page.getViewport({ scale: 1.5 });
+                            const canvas = document.createElement('canvas');
+                            const context = canvas.getContext('2d');
+                            canvas.height = viewport.height;
+                            canvas.width = viewport.width;
+                            canvas.style.marginBottom = '20px';
+
+                            const renderContext = {
+                                canvasContext: context,
+                                viewport: viewport
+                            };
+
+                            return page.render(renderContext).promise.then(function() {
+                                return canvas;
+                            });
+                        })
+                    );
+                }
+
+                Promise.all(renderPromises).then(function(renderedPages) {
+                    renderedPages.forEach(function(canvas) {
+                        pdfContainer.appendChild(canvas);
+                    });
+                });
+            }).catch(function(error) {
+                console.error('Error loading PDF:', error);
+            });
+
+            const pdfViewer = document.getElementById('pdf-viewer');
+            pdfViewer.classList.remove('hidden');
+        }
+
+        function closePDF() {
+            const pdfViewer = document.getElementById('pdf-viewer');
+            const pdfContainer = document.getElementById('pdf-container');
+            
+            pdfContainer.innerHTML = '';
+            pdfViewer.classList.add('hidden');
+        }
+
+        // Fetch documents when page loads
+        document.addEventListener('DOMContentLoaded', fetchDocuments);
+    </script>
+</body>
+</html>
