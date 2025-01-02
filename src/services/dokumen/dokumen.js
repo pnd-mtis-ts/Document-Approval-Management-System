@@ -8,14 +8,12 @@ export * from './dokumen.class.js'
 
 export const dokumen = (app) => {
   const options = getOptions(app)
-  
-  // Register the service
+
   app.use(dokumenPath, new DokumenService(options), {
     methods: dokumenMethods,
     events: []
   })
 
-  // Get the service to apply hooks
   const service = app.service(dokumenPath)
 
   service.hooks({
@@ -32,7 +30,6 @@ export const dokumen = (app) => {
             throw new Error('Request object is missing')
           }
 
-          // Assign context.data from req.body
           context.data = req.body
           console.log('Raw request:', req.body)
 
@@ -40,7 +37,6 @@ export const dokumen = (app) => {
             throw new Error('Judul dokumen harus diisi')
           }
 
-          // Add additional data
           context.data = {
             ...context.data,
             user_id: context.params.user.id,
@@ -60,8 +56,6 @@ export const dokumen = (app) => {
         }
       ]
     },
-    after: {
-      // No after hooks needed since we're using resolvers
-    }
+    after: {}
   })
 }

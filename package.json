@@ -64,6 +64,7 @@
     "@feathersjs/schema": "^5.0.30",
     "@feathersjs/socketio": "^5.0.30",
     "@feathersjs/transport-commons": "^5.0.30",
+    "@koa/multer": "^3.0.2",
     "bcrypt": "^5.1.1",
     "concurrently": "^9.0.1",
     "cookie": "^0.7.2",
@@ -74,6 +75,7 @@
     "koa-body": "^6.0.1",
     "koa-cookie": "^1.0.0",
     "koa-cookies": "^4.0.3",
+    "koa-router": "^13.0.1",
     "koa-static": "^5.0.0",
     "multer": "^1.4.5-lts.1",
     "mysql": "^2.18.1",
@@ -89,6 +91,6 @@
     "cross-env": "^7.0.3",
     "mocha": "^10.7.3",
     "nodemon": "^3.1.7",
-    "prettier": "^3.3.3"
+    "prettier": "^3.4.2"
   }
 }

@@ -1,6 +1,5 @@
 import { KnexService } from '@feathersjs/knex'
 import path from 'path'
-import fs from 'fs/promises'
 
 export class DokumenService extends KnexService {
   async create(data, params) {
@@ -20,11 +19,9 @@ export class DokumenService extends KnexService {
           .first()
 
         if (existingVersion) {
-          // Jika ada, gunakan dokumen_id yang sudah ada
           dokumenId = existingVersion.id
           console.log(`Using existing dokumen_id: ${dokumenId}`)
         } else {
-          // Jika tidak ada, buat dokumen baru
           const insertedDokumen = await trx('dokumen').insert({
             nomor_dokumen: data.nomor_dokumen,
             judul_dokumen: data.judul_dokumen,
@@ -75,7 +72,7 @@ export class DokumenService extends KnexService {
 
           for (let i = 0; i < nama.length; i++) {
             const [insertedDokumenApprovalId] = await trx('dokumenapproval').insert({
-              dokumen_id: dokumenId,
+              dokumen_id: Array.isArray(dokumenId) ? dokumenId[0] : dokumenId,
               nama: nama[i],
               email: email[i],
               jabatan: jabatan[i],
@@ -103,32 +100,27 @@ export class DokumenService extends KnexService {
           const singleDokumenId = Array.isArray(dokumenId) ? dokumenId[0] : dokumenId
           console.log('Using dokumenId:', singleDokumenId)
 
+          if (typeof singleDokumenId !== 'string' && typeof singleDokumenId !== 'number') {
+            throw new Error('Invalid dokumen_id')
+          }
+
           const maxVersionResult = await trx('dokumenversion')
-            .where('dokumen_id', singleDokumenId)
+            .where({ dokumen_id: parseInt(singleDokumenId) })
             .max('version as maxVersion')
             .first()
 
-          const currentMaxVersion = maxVersionResult.maxVersion || 0
+          const currentMaxVersion = maxVersionResult?.maxVersion || 0
           const newVersion = currentMaxVersion + 1
           const idMulter = generateIdMulter()
 
           const baseName = path.parse(data.nama_file).name
           const ext = path.extname(data.nama_file)
-          const prefixedNamaFile = idMulter
-            ? `${idMulter}-${baseName}_versi_${newVersion}${ext}`
-            : `${baseName}_versi_${newVersion}${ext}`
+          const prefixedNamaFile = data.nama_file_multer
 
           const fileUrl = path.join('uploads', prefixedNamaFile)
 
           if (newVersion > 1) {
-            const oldFilePath = path.join('uploads', data.nama_file_multer)
-            try {
-              await fs.rename(oldFilePath, fileUrl)
-              console.log(`Renamed file from ${oldFilePath} to ${fileUrl}`)
-            } catch (err) {
-              console.error('Error renaming file:', err)
-              throw err
-            }
+            console.log(`File already named correctly: ${fileUrl}`)
           }
 
           const mimeType = data.tipe_file
@@ -139,7 +131,7 @@ export class DokumenService extends KnexService {
             file_url: fileUrl,
             tipe_file: tipeFile,
             size_file: data.size_file,
-            dokumen_id: dokumenId,
+            dokumen_id: Array.isArray(dokumenId) ? dokumenId[0] : dokumenId,
             status: 'pending',
             tgl_upload: new Date(),
             deskripsi: data.deskripsi || null,
@@ -169,7 +161,7 @@ export class DokumenService extends KnexService {
             'dokumenversion.file_url'
           )
           .leftJoin('dokumenversion', 'dokumen.id', 'dokumenversion.dokumen_id')
-          .whereIn('dokumen.id', dokumenId)
+          .where('dokumen.id', Array.isArray(dokumenId) ? dokumenId[0] : dokumenId)
           .orderBy('dokumenversion.version', 'desc')
           .first()
 
@@ -188,9 +180,16 @@ export class DokumenService extends KnexService {
     const knex = this.Model
     try {
       const documents = await knex('dokumen')
-        .select('dokumen.*', 'dokumenversion.file_url', 'dokumenversion.version', 'dokumenversion.nama_file')
+        .select(
+          'dokumen.*',
+          'dokumenversion.file_url',
+          'dokumenversion.version',
+          'dokumenversion.nama_file',
+          'users.name'
+        )
         .leftJoin('dokumenversion', 'dokumen.id', 'dokumenversion.dokumen_id')
-        .whereIn(
+        .leftJoin('users', 'dokumen.user_id', 'users.id')
+        .where(
           'dokumenversion.version',
           knex.raw('(SELECT MAX(version) FROM dokumenversion WHERE dokumen_id = dokumen.id)')
         )
@@ -224,11 +223,53 @@ export class DokumenService extends KnexService {
       }
     })
 
-    return super.patch(id, data, params)
+    // Lakukan patch default
+    const result = await super.patch(id, data, params)
+
+    // Tambahkan versi baru jika file diupdate
+    // ...existing code...
+    if (data.nama_file && data.tipe_file && data.size_file) {
+      const trx = await this.Model.transaction()
+      try {
+        const singleDokumenId = id
+        const maxVersionResult = await trx('dokumenversion')
+          .where({ dokumen_id: singleDokumenId })
+          .max('version as maxVersion')
+          .first()
+
+        const currentMaxVersion = maxVersionResult?.maxVersion || 0
+        const newVersion = currentMaxVersion + 1
+
+        const baseName = path.parse(data.nama_file).name
+        const prefixedNamaFile = data.nama_file_multer
+        // ...existing code...
+        const fileUrl = path.join('uploads', prefixedNamaFile)
+        const mimeType = data.tipe_file
+        const tipeFile = mimeType.split('/')[1]
+
+        await trx('dokumenversion').insert({
+          nama_file: prefixedNamaFile,
+          file_url: fileUrl,
+          tipe_file: tipeFile,
+          size_file: data.size_file,
+          dokumen_id: singleDokumenId,
+          status: 'pending',
+          tgl_upload: new Date(),
+          deskripsi: data.deskripsi || null,
+          version: newVersion
+        })
+
+        await trx.commit()
+      } catch (error) {
+        await trx.rollback()
+        throw error
+      }
+    }
+
+    return result
   }
 
   async remove(id, params) {
-    // Add logic to check access if needed
     const { user } = params
     const dokumen = await this.get(id, params)
 

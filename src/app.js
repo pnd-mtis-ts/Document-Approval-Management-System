@@ -15,13 +15,10 @@ import path from 'path'
 
 const app = koa(feathers())
 
-// Load app configuration
 app.configure(configuration(configurationValidator))
 
-// Set up Koa middleware
 app.use(
   cors({
-    // Adjust the origin as per your client application
     credentials: true
   })
 )
@@ -36,18 +33,30 @@ const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'uploads/')
   },
-  filename: (req, file, cb) => {
-    const idMulter = `${Date.now()}${Math.floor(Math.random() * 10)}`
-    const baseName = path.parse(file.originalname).name
-    const ext = path.extname(file.originalname)
-    const prefixedNamaFile = `${idMulter}-${baseName}${ext}`
-    cb(null, prefixedNamaFile)
+  filename: async (req, file, cb) => {
+    try {
+      const knex = app.get('mysqlClient')
+      const nomorDokumen = req.body.nomor_dokumen
+
+      // Get current max version
+      const maxVersionResult = await knex('dokumenversion')
+        .join('dokumen', 'dokumenversion.dokumen_id', 'dokumen.id')
+        .where('dokumen.nomor_dokumen', nomorDokumen)
+        .max('version as maxVersion')
+        .first()
+
+      const currentVersion = (maxVersionResult?.maxVersion || 0) + 1
+      const baseName = path.parse(file.originalname).name
+      const ext = path.extname(file.originalname)
+      const newFilename = `${nomorDokumen}-${baseName}_versi_${currentVersion}${ext}`
+      cb(null, newFilename)
+    } catch (error) {
+      cb(error)
+    }
   }
 })
-
 const upload = multer({ storage: storage })
 
-// Koa middleware to handle file uploads
 app.use(async (ctx, next) => {
   if (ctx.path === '/dokumen' && ctx.method === 'POST') {
     await new Promise((resolve, reject) => {
@@ -59,7 +68,6 @@ app.use(async (ctx, next) => {
         }
       })
     })
-    // Convert prototype-less object to regular object
     const requestBody = Object.assign({}, ctx.req.body)
     ctx.req.body = requestBody
     console.log('Uploaded File:', ctx.req.file)
@@ -70,13 +78,11 @@ app.use(async (ctx, next) => {
       ctx.req.body.size_file = ctx.req.file.size
       ctx.req.body.nama_file_multer = ctx.req.file.filename
     }
-    // Attach req to context.params
     ctx.feathers = { req: ctx.req }
   }
   await next()
 })
 
-// Configure services and real-time functionality
 app.configure(rest())
 app.configure(
   socketio({
@@ -90,7 +96,6 @@ app.configure(authentication)
 app.configure(services)
 app.configure(channels)
 
-// Configure a middleware for 404s and the error handler
 app.use(async (ctx, next) => {
   await next()
   if (ctx.status === 404) {
